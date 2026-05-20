@@ -1,0 +1,1150 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>意識形態百科全書 - 硬核存檔系統</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --accent: #ff4d00; /* Industrial Orange */
+            --steel: #b0b0b0;
+            --charcoal: #25262a; /* Raised from #1a1a1b to make background lighter */
+            --concrete: #e4e4e7;
+            --border-color: #3f4048;
+            --panel-bg: #1c1d22;
+        }
+        body {
+            font-family: 'Inter', 'Noto Sans TC', sans-serif;
+            background-color: var(--charcoal);
+            color: var(--concrete);
+            font-size: 16px;
+            background-image: 
+                linear-gradient(var(--charcoal) 24px, rgba(255, 255, 255, 0.04) 25px),
+                linear-gradient(90deg, var(--charcoal) 24px, rgba(255, 255, 255, 0.04) 25px);
+            background-size: 25px 25px;
+            position: relative;
+        }
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('https://www.transparenttextures.com/patterns/carbon-fibre.png');
+            opacity: 0.07;
+            pointer-events: none;
+            z-index: -1;
+        }
+        .industrial-panel, .glass-panel {
+            background: var(--panel-bg);
+            border: 2px solid var(--border-color);
+            position: relative;
+            padding: 2.5rem;
+        }
+        .industrial-panel::before, .glass-panel::before {
+            content: "";
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            width: 12px;
+            height: 12px;
+            border-top: 2px solid var(--accent);
+            border-left: 2px solid var(--accent);
+        }
+        .industrial-panel::after, .glass-panel::after {
+            content: "";
+            position: absolute;
+            bottom: -2px;
+            right: -2px;
+            width: 12px;
+            height: 12px;
+            border-bottom: 2px solid var(--accent);
+            border-right: 2px solid var(--accent);
+        }
+        .section-header, .neon-border {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: -0.02em;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 0.75rem;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .section-header .dot, .neon-border::after {
+            width: 10px;
+            height: 10px;
+            background: var(--accent);
+        }
+        /* Removed redundant neon-border::after background logic if needed, 
+           but let's keep it simple. Actually neon-border::after in the old CSS 
+           was a line. I'll just make it a dot or ignore the old after. */
+        .neon-border::after {
+            content: none;
+        }
+        .glow-text {
+            text-shadow: 0 0 10px rgba(255, 77, 0, 0.2);
+        }
+        .tech-button {
+            background: var(--accent);
+            color: #000;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 800;
+            text-transform: uppercase;
+            padding: 1.25rem;
+            transition: all 0.2s ease;
+            width: 100%;
+            display: block;
+            text-align: center;
+            border: none;
+        }
+        .tech-button:hover {
+            background: #fff;
+            color: #000;
+            transform: translate(6px, -6px);
+            box-shadow: -6px 6px 0 var(--accent);
+        }
+        .tech-button:active {
+            transform: translate(0, 0);
+            box-shadow: none;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 5px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: var(--charcoal);
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: var(--accent);
+        }
+        .ideology-node {
+            border: 1px solid var(--border-color);
+            background: var(--panel-bg);
+            padding: 1.5rem;
+            transition: all 0.2s ease;
+        }
+        .ideology-node:hover {
+            border-color: var(--accent);
+            background: #26272c;
+        }
+        .tag-pill {
+            background: #232428;
+            border: 1px solid var(--border-color);
+            color: #ccc;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            padding: 4px 10px;
+            border-radius: 0;
+        }
+        select, textarea, input {
+            background: #15161a !important;
+            border: 1px solid var(--border-color) !important;
+            color: #fff !important;
+            border-radius: 0 !important;
+            font-family: 'JetBrains Mono', monospace;
+            padding: 1rem !important;
+        }
+        select:focus, textarea:focus {
+            border-color: var(--accent) !important;
+            outline: none;
+        }
+        option {
+            background-color: #15161a;
+            color: #fff;
+        }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        .markdown-body {
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+        .markdown-body h1, .markdown-body h2, .markdown-body h3 {
+            color: var(--accent);
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 800;
+        }
+        .markdown-body p {
+            margin-bottom: 1rem;
+            color: #ccc;
+        }
+        .markdown-body strong {
+            color: #fff;
+        }
+        .comparison-mode .query-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        .comparison-mode .hide-in-comparison {
+            display: none;
+        }
+    </style>
+</head>
+<body class="min-h-screen selection:bg-[#ff4d00]/30 overflow-x-hidden">
+
+    <!-- 頂部導覽列 -->
+    <nav class="border-b-4 border-zinc-850 bg-zinc-900 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="flex justify-between h-20 items-center">
+                <div class="flex items-center gap-6">
+                    <div class="w-12 h-12 bg-white flex items-center justify-center text-black font-black">
+                        <span class="text-xl">ID</span>
+                    </div>
+                    <div>
+                        <span class="text-2xl font-black tracking-tighter text-white mono">IDEOLOGY.DB_VER_2.8</span>
+                        <span class="block text-[10px] text-[var(--accent)] font-mono uppercase tracking-widest opacity-80">Industrial Data Node</span>
+                    </div>
+                </div>
+                <div class="hidden md:flex items-center gap-8 text-xs font-bold tracking-tighter mono">
+                    <div class="flex items-center gap-3">
+                        <label class="text-zinc-500">TWIN_QUERY_MODE</label>
+                        <button id="toggleComparison" class="w-10 h-5 bg-zinc-800 rounded-full relative transition-all border border-zinc-700">
+                            <div class="dot w-3 h-3 bg-zinc-500 rounded-full absolute top-1 left-1 pb-0 transition-all"></div>
+                        </button>
+                    </div>
+                    <div class="flex items-center gap-4 text-zinc-600">
+                        <span class="animate-pulse">●</span>
+                        <span>SECURE_CONNECTION_ESTABLISHED</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto px-6 py-20">
+        
+        <!-- 系統狀態列 -->
+        <div class="mb-20 flex flex-col md:flex-row justify-between items-start md:items-end gap-10 border-l-8 border-[var(--accent)] pl-10">
+            <div class="space-y-4">
+                <h1 class="text-8xl font-black text-white tracking-tighter italic uppercase leading-none">
+                    思想譜系<br><span class="text-[var(--accent)]">百科全書</span>
+                </h1>
+                <p class="text-zinc-500 font-medium text-xl max-w-xl">
+                    [DATABASE_DESCRIPTION] 人類文明思想架構之硬核存檔系統。所有數據皆經過多重驗證。
+                </p>
+            </div>
+            <div class="mono text-xs text-white bg-zinc-800 px-6 py-3 border border-zinc-700">
+                STATUS: <span class="text-green-400">RUNNING</span> | <span id="sysTime" class="text-[var(--accent)]">2026.04.16</span>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
+            
+            <!-- 左側：輸入與百科詳解 (佔 5 欄) -->
+            <div class="lg:col-span-5 space-y-12">
+                <div class="industrial-panel">
+                    <h2 class="section-header text-xl">
+                        <span class="dot"></span> 意識形態查詢 [SEARCH]
+                    </h2>
+                    
+                    <form id="ideologyForm" class="space-y-10">
+                        <div id="queryGrid" class="space-y-10">
+                            <!-- 第一組查詢 -->
+                            <div class="space-y-10">
+                                <div class="space-y-4">
+                                    <label class="block text-xs font-bold text-zinc-500 uppercase mono">01_主類別 [CLASS]</label>
+                                    <select id="mainType" class="w-full text-white focus:ring-0 outline-none transition-all appearance-none">
+                                        <option value="">INITIALIZING_DATA...</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="space-y-4">
+                                    <label class="block text-xs font-bold text-zinc-500 uppercase mono">02_子分支 [SUB_BRANCH]</label>
+                                    <select id="subType" class="w-full text-white focus:ring-0 outline-none transition-all appearance-none">
+                                        <option value="">WAITING_FOR_CLASS_PRIMARY...</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- 第二組查詢 (僅在比較模式顯示) -->
+                            <div id="secondQuery" class="space-y-10 hidden border-l border-zinc-800 pl-4">
+                                <div class="space-y-4">
+                                    <label class="block text-xs font-bold text-zinc-500 uppercase mono">01B_對比類別 [COMP_CLASS]</label>
+                                    <select id="mainTypeB" class="w-full text-white focus:ring-0 outline-none transition-all appearance-none">
+                                        <!-- 動態填充 -->
+                                    </select>
+                                </div>
+                                
+                                <div class="space-y-4">
+                                    <label class="block text-xs font-bold text-zinc-500 uppercase mono">02B_對比分支 [COMP_BRANCH]</label>
+                                    <select id="subTypeB" class="w-full text-white focus:ring-0 outline-none transition-all appearance-none">
+                                        <!-- 動態填充 -->
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 百科詳解區塊 -->
+                        <div id="ideologyIntro" class="hidden p-10 bg-zinc-900/50 border-l-4 border-[var(--accent)] animate-in slide-in-from-left duration-500">
+                            <!-- 動態填充由 JavaScript 更新 -->
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <label class="block text-xs font-bold text-zinc-500 uppercase mono">03_查詢備註 [SEARCH_NOTES]</label>
+                            <textarea id="notes" rows="5" class="w-full text-white outline-none transition-all" placeholder="[AWAITING_QUERY_PARAMS]..."></textarea>
+                        </div>
+                        
+                        <button type="submit" id="submitBtn" class="tech-button">
+                            開始檢索 [START_QUERY]
+                        </button>
+                    </form>
+
+                    <!-- AI 深度分析區塊 -->
+                    <div id="aiAnalysisPanel" class="mt-12 space-y-8 p-10 bg-zinc-900/30 border border-zinc-700 hidden relative overflow-hidden">
+                        <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[var(--accent)] to-transparent opacity-50"></div>
+                        <h3 class="text-xs font-black text-white uppercase mono flex items-center justify-between">
+                            <span class="flex items-center gap-2">
+                                <span class="w-2 h-2 bg-blue-500 animate-pulse"></span>
+                                AI_DEEP_LEVEL_ANALYSIS [GEN_3]
+                            </span>
+                            <span class="text-[var(--accent)] text-[10px] animate-pulse">PROCESSING_RESONANCE...</span>
+                        </h3>
+                        
+                        <div id="aiContent" class="markdown-body text-zinc-400">
+                            <!-- AI 內容插槽 -->
+                        </div>
+
+                        <div class="mt-8 pt-8 border-t border-zinc-900 flex justify-between items-center opacity-50">
+                            <span class="text-[9px] mono text-zinc-600">SOURCE: GEMINI_FLASH_NEURAL_NET</span>
+                            <span class="text-[9px] mono text-zinc-600">VERIFIED: TRUE</span>
+                        </div>
+                    </div>
+                    
+                    <div id="statusMsg" class="mt-8 text-xs font-bold text-center hidden mono"></div>
+                </div>
+            </div>
+            
+            <!-- 右側：圖譜與紀錄 (佔 7 欄) -->
+            <div class="lg:col-span-7 space-y-12">
+                
+                <!-- 意識形態圖譜 -->
+                <div class="industrial-panel">
+                    <h2 class="section-header text-xl">
+                        <span class="dot"></span> 思想光譜交互圖譜 [INTERACTIVE_MAP]
+                    </h2>
+                    
+                    <div id="ideologyMap" class="grid grid-cols-1 md:grid-cols-2 gap-6 max-h-[800px] overflow-y-auto pr-6 custom-scrollbar">
+                        <!-- 動態內容 -->
+                    </div>
+                </div>
+                
+                <!-- 歷史紀錄 -->
+                <div class="industrial-panel">
+                    <h2 class="section-header text-xl flex justify-between items-center">
+                        <div class="flex items-center gap-3"><span class="dot"></span> 系統操作日誌 [LOGS]</div>
+                        <span class="text-[10px] text-zinc-600 font-mono italic">REALTIME_SYNC_ENABLED</span>
+                    </h2>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="text-zinc-600 border-b-2 border-zinc-900 text-[10px] mono">
+                                    <th class="pb-6 px-4 uppercase font-black tracking-widest">TIMESTAMP</th>
+                                    <th class="pb-6 px-4 uppercase font-black tracking-widest">CLASS</th>
+                                    <th class="pb-6 px-4 uppercase font-black tracking-widest">SUB_BRANCH</th>
+                                    <th class="pb-6 px-4 uppercase font-black tracking-widest text-right">STATUS</th>
+                                </tr>
+                            </thead>
+                            <tbody id="historyBody" class="text-sm mono">
+                                <!-- 動態內容 -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-zinc-900 py-20 border-t-8 border-zinc-800">
+        <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-10">
+            <div class="flex items-center gap-4">
+                <div class="w-8 h-8 bg-[var(--accent)]"></div>
+                <p class="text-[10px] font-bold text-zinc-700 mono uppercase tracking-widest">
+                    // SYSTEM_ARCHIVE_CORE // ENCRYPTED_CHANNEL_SECURED
+                </p>
+            </div>
+            <div class="flex gap-2">
+                <div class="w-16 h-1 bg-zinc-900"></div>
+                <div class="w-16 h-1 bg-[var(--accent)]"></div>
+                <div class="w-16 h-1 bg-zinc-900"></div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // 系統時間更新
+        setInterval(() => {
+            const now = new Date();
+            document.getElementById('sysTime').textContent = now.getFullYear() + '.' + 
+                String(now.getMonth() + 1).padStart(2, '0') + '.' + 
+                String(now.getDate()).padStart(2, '0') + '_' + 
+                now.toLocaleTimeString('en-GB');
+        }, 1000);
+
+        /**
+         * 模擬 Google Apps Script 的 google.script.run
+         */
+        const google = {
+            script: {
+                run: {
+                    _createRunner: function() {
+                        return {
+                            _successHandler: null,
+                            _failureHandler: null,
+                            withSuccessHandler: function(handler) { this._successHandler = handler; return this; },
+                            withFailureHandler: function(handler) { this._failureHandler = handler; return this; },
+                            _call: async function(funcName, args) {
+                                try {
+                                    const response = await fetch(`/api/run/${funcName}`, {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({ args })
+                                    });
+                                    const result = await response.json();
+                                    if (result.status === "success") {
+                                        if (this._successHandler) this._successHandler(result.data || result);
+                                    } else {
+                                        if (this._failureHandler) this._failureHandler(result.message);
+                                    }
+                                } catch (error) {
+                                    if (this._failureHandler) this._failureHandler(error);
+                                }
+                            },
+                            getIdeologyData: function() { this._call('getIdeologyData', []); },
+                            saveIdeology: function(data) { this._call('saveIdeology', [data]); },
+                            getSavedEntries: function() { this._call('getSavedEntries', []); },
+                            analyzeIdeology: function(name, desc) { this._call('analyzeIdeology', [name, desc]); },
+                            compareIdeologies: function(nameA, descA, nameB, descB) { this._call('compareIdeologies', [nameA, descA, nameB, descB]); }
+                        };
+                    },
+                    withSuccessHandler: function(handler) { return this._createRunner().withSuccessHandler(handler); },
+                    withFailureHandler: function(handler) { return this._createRunner().withFailureHandler(handler); }
+                }
+            }
+        };
+
+        let ideologyDatabase = {};
+        let isComparisonMode = false;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadData();
+            refreshHistory();
+            initComparisonToggle();
+        });
+
+        function initComparisonToggle() {
+            const btn = document.getElementById('toggleComparison');
+            const dot = btn.querySelector('.dot');
+            const secondQuery = document.getElementById('secondQuery');
+            const queryGrid = document.getElementById('queryGrid');
+            const introBox = document.getElementById('ideologyIntro');
+
+            btn.addEventListener('click', () => {
+                isComparisonMode = !isComparisonMode;
+                if (isComparisonMode) {
+                    btn.classList.add('bg-[var(--accent)]');
+                    dot.classList.add('translate-x-5', 'bg-white');
+                    secondQuery.classList.remove('hidden');
+                    queryGrid.classList.add('grid', 'grid-cols-2', 'gap-4', 'space-y-0');
+                    introBox.classList.add('hidden'); // 比較模式先隱藏詳解
+                    renderMainOptionsB();
+                } else {
+                    btn.classList.remove('bg-[var(--accent)]');
+                    dot.classList.remove('translate-x-5', 'bg-white');
+                    secondQuery.classList.add('hidden');
+                    queryGrid.classList.remove('grid', 'grid-cols-2', 'gap-4', 'space-y-0');
+                }
+                updateReadout();
+            });
+        }
+
+        function loadData() {
+            google.script.run
+                .withSuccessHandler((data) => {
+                    ideologyDatabase = data;
+                    renderMainOptions();
+                    renderIdeologyMap();
+                })
+                .getIdeologyData();
+        }
+
+        function renderMainOptions() {
+            const select = document.getElementById('mainType');
+            const selectB = document.getElementById('mainTypeB');
+            const placeholder = '<option value="">SELECT_CATEGORY...</option>';
+            select.innerHTML = placeholder;
+            if (selectB) selectB.innerHTML = placeholder;
+
+            Object.keys(ideologyDatabase).forEach(key => {
+                const opt = document.createElement('option');
+                opt.value = key;
+                opt.textContent = key;
+                select.appendChild(opt);
+                
+                if (selectB) {
+                    const optB = opt.cloneNode(true);
+                    selectB.appendChild(optB);
+                }
+            });
+            applySelectorColors();
+        }
+
+        function renderMainOptionsB() {
+            const selectB = document.getElementById('mainTypeB');
+            if (selectB.options.length <= 1) { // 僅在未填充時填充
+                renderMainOptions();
+            }
+        }
+
+        document.getElementById('mainType').addEventListener('change', (e) => handleMainTypeChange(e, 'subType'));
+        document.getElementById('mainTypeB').addEventListener('change', (e) => handleMainTypeChange(e, 'subTypeB'));
+
+        function handleMainTypeChange(e, subSelectId) {
+            const subSelect = document.getElementById(subSelectId);
+            const mainType = e.target.value;
+            const introBox = document.getElementById('ideologyIntro');
+            
+            subSelect.innerHTML = '<option value="">SELECT_SUB_BRANCH...</option>';
+            if (subSelectId === 'subType') introBox.classList.add('hidden');
+            
+            if (mainType && ideologyDatabase[mainType]) {
+                Object.keys(ideologyDatabase[mainType]).forEach(sub => {
+                    const opt = document.createElement('option');
+                    opt.value = sub;
+                    opt.textContent = sub;
+                    subSelect.appendChild(opt);
+                });
+            }
+            updateReadout();
+        }
+
+        document.getElementById('subType').addEventListener('change', () => updateReadout());
+        document.getElementById('subTypeB').addEventListener('change', () => updateReadout());
+
+        function updateReadout() {
+            const mainType = document.getElementById('mainType').value;
+            const subType = document.getElementById('subType').value;
+            const mainTypeB = document.getElementById('mainTypeB').value;
+            const subTypeB = document.getElementById('subTypeB').value;
+            const introBox = document.getElementById('ideologyIntro');
+
+            if (!isComparisonMode) {
+                if (mainType && subType && ideologyDatabase[mainType][subType]) {
+                    const data = ideologyDatabase[mainType][subType];
+                    const theme = data.theme || { hex: "#ff4d00", name: "orange" };
+                    const metrics = data.metrics || { liberty: 50, market: 50, progress: 50, globalize: 50 };
+                    
+                    // 動的にアクセントカラーを変更！
+                    document.documentElement.style.setProperty('--accent', theme.hex);
+                    
+                    let imageSectionHtml = '';
+                    if (data.figureImage) {
+                        imageSectionHtml = `
+                            <div id="figureImageContainer" class="mb-6">
+                                <h4 class="text-[10px] font-bold text-zinc-500 uppercase mono mb-4 flex items-center gap-2">
+                                    [RECONNAISSANCE_IMAGE_FEED] <span class="w-2 h-2 animate-pulse rounded-full" style="background-color: ${theme.hex}; box-shadow: 0 0 6px ${theme.hex}"></span>
+                                </h4>
+                                <div class="relative group overflow-hidden bg-zinc-900 aspect-[4/5] w-full max-w-[200px]" style="border: 1px solid ${theme.hex}50">
+                                    <img id="figureImage" src="" alt="Representative Figure" class="w-full h-full object-cover filter grayscale sepia brightness-90 hover:grayscale-0 hover:sepia-0 transition-all duration-700" referrerpolicy="no-referrer">
+                                    <div id="imageLoadingOverlay" class="absolute inset-0 flex items-center justify-center bg-zinc-900/80">
+                                        <div class="w-6 h-6 border-2 border-t-transparent animate-spin rounded-full" style="border-color: ${theme.hex}; border-top-color: transparent"></div>
+                                    </div>
+                                    <div id="imageErrorOverlay" class="absolute inset-0 flex items-center justify-center bg-zinc-900 flex-col gap-2 hidden">
+                                        <span class="text-[10px] mono" style="color: ${theme.hex}">SIGNAL_LOST</span>
+                                        <span class="text-zinc-600 text-[8px] mono">ENCRYPT_MISMATCH</span>
+                                    </div>
+                                    <div class="absolute inset-0 border-4 border-black/50 pointer-events-none"></div>
+                                    <div class="absolute top-2 right-2 text-black px-1 text-[8px] font-black mono select-none" style="background-color: ${theme.hex}">CONFIDENTIAL</div>
+                                </div>
+                            </div>
+                        `;
+                    }
+                    
+                    introBox.innerHTML = `
+                        <div class="space-y-8 animate-in fade-in duration-300">
+                            ${imageSectionHtml}
+                            <div>
+                                <h4 class="text-xs font-black uppercase mono mb-4 flex items-center gap-2" style="color: ${theme.hex}">
+                                    [DATA_STREAM_READOUT]
+                                </h4>
+                                <p class="text-lg text-zinc-300 leading-snug">${data.desc}</p>
+                            </div>
+                            
+                            <div class="grid grid-cols-2 gap-8">
+                                <div>
+                                    <h4 class="text-[10px] font-bold text-zinc-500 uppercase mono mb-4">國家/地區 [LOC]</h4>
+                                    <div class="flex flex-wrap gap-2">
+                                        ${data.countries.map(c => `<span class="tag-pill text-[9px] px-2 py-0.5 rounded-sm font-mono">${c}</span>`).join('')}
+                                    </div>
+                                </div>
+                                <div>
+                                    <h4 class="text-[10px] font-bold text-zinc-500 uppercase mono mb-4">思想家 [PPL]</h4>
+                                    <div class="flex flex-wrap gap-2">
+                                        ${data.figures.map(f => `<span class="tag-pill text-[9px] px-2 py-0.5 rounded-sm font-mono" style="border-color: ${theme.hex}50; color: ${theme.hex}">${f}</span>`).join('')}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <hr class="border-zinc-800" />
+
+                            <div class="space-y-4">
+                                <h4 class="text-xs font-bold text-zinc-500 uppercase mono">[SPECTRAL_VALUES] 思想光譜定位</h4>
+                                <div class="space-y-5 bg-zinc-900/50 p-6 border border-zinc-700/60">
+                                    <div>
+                                        <div class="flex justify-between text-[11px] mono mb-1 text-zinc-400">
+                                            <span>個體自由 <span class="font-bold" style="color: ${theme.hex}">${metrics.liberty}%</span></span>
+                                            <span>集體秩序 <span class="text-zinc-600">${100 - metrics.liberty}%</span></span>
+                                        </div>
+                                        <div class="h-2 bg-zinc-900 relative border border-zinc-800">
+                                            <div class="h-full transition-all duration-1000" style="width: ${metrics.liberty}%; background-color: ${theme.hex}"></div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div>
+                                        <div class="flex justify-between text-[11px] mono mb-1 text-zinc-400">
+                                            <span>自由市場 <span class="font-bold" style="color: ${theme.hex}">${metrics.market}%</span></span>
+                                            <span>計畫集體 <span class="text-zinc-600">${100 - metrics.market}%</span></span>
+                                        </div>
+                                        <div class="h-2 bg-zinc-900 relative border border-zinc-850">
+                                            <div class="h-full transition-all duration-1000" style="width: ${metrics.market}%; background-color: ${theme.hex}"></div>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <div class="flex justify-between text-[11px] mono mb-1 text-zinc-400">
+                                            <span>進步變革 <span class="font-bold" style="color: ${theme.hex}">${metrics.progress}%</span></span>
+                                            <span>傳統秩序 <span class="text-zinc-600">${100 - metrics.progress}%</span></span>
+                                        </div>
+                                        <div class="h-2 bg-zinc-900 relative border border-zinc-850">
+                                            <div class="h-full transition-all duration-1000" style="width: ${metrics.progress}%; background-color: ${theme.hex}"></div>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <div class="flex justify-between text-[11px] mono mb-1 text-zinc-400">
+                                            <span>全球治理 <span class="font-bold" style="color: ${theme.hex}">${metrics.globalize}%</span></span>
+                                            <span>本土主權 <span class="text-zinc-600">${100 - metrics.globalize}%</span></span>
+                                        </div>
+                                        <div class="h-2 bg-zinc-900 relative border border-zinc-850">
+                                            <div class="h-full transition-all duration-1000" style="width: ${metrics.globalize}%; background-color: ${theme.hex}"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    introBox.style.borderLeftColor = theme.hex;
+                    introBox.classList.remove('hidden');
+                    
+                    if (data.figureImage) {
+                        loadFigureWithProxy(data.figureImage, 'figureImage', 'imageLoadingOverlay', 'imageErrorOverlay');
+                    }
+                    
+                    runAiAnalysis(subType, data.desc);
+                } else {
+                    introBox.classList.add('hidden');
+                    document.documentElement.style.setProperty('--accent', '#ff4d00'); // restore
+                }
+            } else {
+                if (mainType && subType && mainTypeB && subTypeB && ideologyDatabase[mainType][subType] && ideologyDatabase[mainTypeB][subTypeB]) {
+                    const dataA = ideologyDatabase[mainType][subType];
+                    const dataB = ideologyDatabase[mainTypeB][subTypeB];
+                    const themeA = dataA.theme || { hex: "#ff4d00", name: "orange" };
+                    const themeB = dataB.theme || { hex: "#22d3ee", name: "cyan" };
+                    const metricsA = dataA.metrics || { liberty: 50, market: 50, progress: 50, globalize: 50 };
+                    const metricsB = dataB.metrics || { liberty: 50, market: 50, progress: 50, globalize: 50 };
+                    
+                    let imageSectionA = '';
+                    if (dataA.figureImage) {
+                        imageSectionA = `
+                            <div class="relative group overflow-hidden bg-zinc-900 aspect-[4/5] w-[90px] shrink-0" style="border: 1px solid ${themeA.hex}50">
+                                <img id="figureImgA" src="" alt="Figure A" class="w-full h-full object-cover filter grayscale sepia brightness-95" referrerpolicy="no-referrer">
+                                <div id="loaderA" class="absolute inset-0 flex items-center justify-center bg-zinc-900/80">
+                                    <div class="w-4 h-4 border border-t-transparent animate-spin rounded-full" style="border-color: ${themeA.hex}; border-top-color: transparent"></div>
+                                </div>
+                            </div>
+                        `;
+                    }
+                    let imageSectionB = '';
+                    if (dataB.figureImage) {
+                        imageSectionB = `
+                            <div class="relative group overflow-hidden bg-zinc-900 aspect-[4/5] w-[90px] shrink-0" style="border: 1px solid ${themeB.hex}50">
+                                <img id="figureImgB" src="" alt="Figure B" class="w-full h-full object-cover filter grayscale sepia brightness-95" referrerpolicy="no-referrer">
+                                <div id="loaderB" class="absolute inset-0 flex items-center justify-center bg-zinc-900/80">
+                                    <div class="w-4 h-4 border border-t-transparent animate-spin rounded-full" style="border-color: ${themeB.hex}; border-top-color: transparent"></div>
+                                </div>
+                            </div>
+                        `;
+                    }
+
+                    introBox.innerHTML = `
+                        <div class="space-y-8 animate-in fade-in duration-300">
+                            <h4 class="text-xs font-bold text-zinc-500 uppercase mono tracking-widest">[TWIN_SPECTRUM_RECONNAISSANCE]</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 divide-y md:divide-y-0 md:divide-x divide-zinc-900">
+                                <!-- Ideology A -->
+                                <div class="space-y-4">
+                                    <div class="flex items-start gap-4">
+                                        ${imageSectionA}
+                                        <div class="flex-1 space-y-2">
+                                            <div class="flex items-center gap-2">
+                                                <span class="w-2.5 h-2.5 shadow-sm" style="background-color: ${themeA.hex}; box-shadow: 0 0 6px ${themeA.hex}"></span>
+                                                <h3 class="text-sm font-black text-white uppercase mono">${subType}</h3>
+                                            </div>
+                                            <p class="text-xs text-zinc-400 leading-relaxed">${dataA.desc}</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex flex-wrap gap-1.5 pt-2">
+                                        ${dataA.countries.map(c => `<span class="tag-pill text-[9px] px-2 py-0.5 rounded-sm font-mono">${c}</span>`).join('')}
+                                        ${dataA.figures.map(f => `<span class="tag-pill text-[9px] px-2 py-0.5 rounded-sm font-mono" style="border-color: ${themeA.hex}50; color: ${themeA.hex}">${f}</span>`).join('')}
+                                    </div>
+                                </div>
+                                <!-- Ideology B -->
+                                <div class="space-y-4 md:pl-6 pt-6 md:pt-0">
+                                    <div class="flex items-start gap-4">
+                                        ${imageSectionB}
+                                        <div class="flex-1 space-y-2">
+                                            <div class="flex items-center gap-2">
+                                                <span class="w-2.5 h-2.5 shadow-sm" style="background-color: ${themeB.hex}; box-shadow: 0 0 6px ${themeB.hex}"></span>
+                                                <h3 class="text-sm font-black text-white uppercase mono">${subTypeB}</h3>
+                                            </div>
+                                            <p class="text-xs text-zinc-400 leading-relaxed">${dataB.desc}</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex flex-wrap gap-1.5 pt-2">
+                                        ${dataB.countries.map(c => `<span class="tag-pill text-[9px] px-2 py-0.5 rounded-sm font-mono">${c}</span>`).join('')}
+                                        ${dataB.figures.map(f => `<span class="tag-pill text-[9px] px-2 py-0.5 rounded-sm font-mono" style="border-color: ${themeB.hex}50; color: ${themeB.hex}">${f}</span>`).join('')}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <hr class="border-zinc-800" />
+                            
+                            <!-- DUAL SPECTRUM COMPARISON VALUES -->
+                            <div class="space-y-4">
+                                <h4 class="text-xs font-bold text-zinc-500 uppercase mono">[SPECTRAL_OVERLAY] 雙軌光譜定位</h4>
+                                <div class="space-y-5 bg-zinc-900/50 p-6 border border-zinc-700/60">
+                                    <!-- Axis 1 -->
+                                    <div>
+                                        <div class="flex justify-between text-[11px] mono mb-2 text-zinc-400">
+                                            <span>主權自由度 [INDIVIDUAL vs COLLECTIVE]</span>
+                                        </div>
+                                        <div class="space-y-2">
+                                            <div class="flex items-center gap-2">
+                                                <div class="w-20 text-[10px] mono text-zinc-500 truncate">${subType}</div>
+                                                <div class="flex-1 h-1.5 bg-zinc-900 relative">
+                                                    <div class="h-full" style="width: ${metricsA.liberty}%; background-color: ${themeA.hex}"></div>
+                                                </div>
+                                                <span class="text-[10px] mono w-8 text-right" style="color: ${themeA.hex}">${metricsA.liberty}%</span>
+                                            </div>
+                                            <div class="flex items-center gap-2">
+                                                <div class="w-20 text-[10px] mono text-zinc-500 truncate">${subTypeB}</div>
+                                                <div class="flex-1 h-1.5 bg-zinc-900 relative">
+                                                    <div class="h-full" style="width: ${metricsB.liberty}%; background-color: ${themeB.hex}"></div>
+                                                </div>
+                                                <span class="text-[10px] mono w-8 text-right" style="color: ${themeB.hex}">${metricsB.liberty}%</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Axis 2 -->
+                                    <div>
+                                        <div class="flex justify-between text-[11px] mono mb-2 text-zinc-400">
+                                            <span>市場經濟度 [FREE MARKET vs COLLECTIVE PLANNING]</span>
+                                        </div>
+                                        <div class="space-y-2">
+                                            <div class="flex items-center gap-2">
+                                                <div class="w-20 text-[10px] mono text-zinc-500 truncate">${subType}</div>
+                                                <div class="flex-1 h-1.5 bg-zinc-900 relative">
+                                                    <div class="h-full" style="width: ${metricsA.market}%; background-color: ${themeA.hex}"></div>
+                                                </div>
+                                                <span class="text-[10px] mono w-8 text-right" style="color: ${themeA.hex}">${metricsA.market}%</span>
+                                            </div>
+                                            <div class="flex items-center gap-2">
+                                                <div class="w-20 text-[10px] mono text-zinc-500 truncate">${subTypeB}</div>
+                                                <div class="flex-1 h-1.5 bg-zinc-900 relative">
+                                                    <div class="h-full" style="width: ${metricsB.market}%; background-color: ${themeB.hex}"></div>
+                                                </div>
+                                                <span class="text-[10px] mono w-8 text-right" style="color: ${themeB.hex}">${metricsB.market}%</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Axis 3 -->
+                                    <div>
+                                        <div class="flex justify-between text-[11px] mono mb-2 text-zinc-400">
+                                            <span>文化價值觀 [PROGRESS vs TRADITION]</span>
+                                        </div>
+                                        <div class="space-y-2">
+                                            <div class="flex items-center gap-2">
+                                                <div class="w-20 text-[10px] mono text-zinc-500 truncate">${subType}</div>
+                                                <div class="flex-1 h-1.5 bg-zinc-900 relative">
+                                                    <div class="h-full" style="width: ${metricsA.progress}%; background-color: ${themeA.hex}"></div>
+                                                </div>
+                                                <span class="text-[10px] mono w-8 text-right" style="color: ${themeA.hex}">${metricsA.progress}%</span>
+                                            </div>
+                                            <div class="flex items-center gap-2">
+                                                <div class="w-20 text-[10px] mono text-zinc-500 truncate">${subTypeB}</div>
+                                                <div class="flex-1 h-1.5 bg-zinc-900 relative">
+                                                    <div class="h-full" style="width: ${metricsB.progress}%; background-color: ${themeB.hex}"></div>
+                                                </div>
+                                                <span class="text-[10px] mono w-8 text-right" style="color: ${themeB.hex}">${metricsB.progress}%</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Axis 4 -->
+                                    <div>
+                                        <div class="flex justify-between text-[11px] mono mb-2 text-zinc-400">
+                                            <span>地理與認同 [COSMOPOLITAN vs LOCAL SOVEREIGNTY]</span>
+                                        </div>
+                                        <div class="space-y-2">
+                                            <div class="flex items-center gap-2">
+                                                <div class="w-20 text-[10px] mono text-zinc-500 truncate">${subType}</div>
+                                                <div class="flex-1 h-1.5 bg-zinc-900 relative">
+                                                    <div class="h-full" style="width: ${metricsA.globalize}%; background-color: ${themeA.hex}"></div>
+                                                </div>
+                                                <span class="text-[10px] mono w-8 text-right" style="color: ${themeA.hex}">${metricsA.globalize}%</span>
+                                            </div>
+                                            <div class="flex items-center gap-2">
+                                                <div class="w-20 text-[10px] mono text-zinc-500 truncate">${subTypeB}</div>
+                                                <div class="flex-1 h-1.5 bg-zinc-900 relative">
+                                                    <div class="h-full" style="width: ${metricsB.globalize}%; background-color: ${themeB.hex}"></div>
+                                                </div>
+                                                <span class="text-[10px] mono w-8 text-right" style="color: ${themeB.hex}">${metricsB.globalize}%</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    introBox.style.borderLeftColor = themeA.hex;
+                    introBox.classList.remove('hidden');
+
+                    if (dataA.figureImage) {
+                        loadFigureWithProxy(dataA.figureImage, 'figureImgA', 'loaderA', null);
+                    }
+                    if (dataB.figureImage) {
+                        loadFigureWithProxy(dataB.figureImage, 'figureImgB', 'loaderB', null);
+                    }
+
+                    runAiComparison(subType, dataA.desc, subTypeB, dataB.desc);
+                } else {
+                    introBox.classList.add('hidden');
+                }
+            }
+            applySelectorColors();
+        }
+
+        function applySelectorColors() {
+            // Left side (A)
+            const mainSelect = document.getElementById('mainType');
+            const subSelect = document.getElementById('subType');
+            if (!mainSelect || !subSelect) return;
+            
+            let themeHexA = '#27272a'; // default zinc-800
+            let labelHexA = '#71717a'; // default zinc-500
+            const valA = mainSelect.value;
+            if (valA && ideologyDatabase[valA]) {
+                const firstSub = Object.keys(ideologyDatabase[valA])[0];
+                if (firstSub && ideologyDatabase[valA][firstSub]?.theme) {
+                    themeHexA = ideologyDatabase[valA][firstSub].theme.hex;
+                    labelHexA = themeHexA;
+                }
+            }
+            
+            const subValA = subSelect.value;
+            let subThemeHexA = '#27272a';
+            let subLabelHexA = '#71717a';
+            if (valA && subValA && ideologyDatabase[valA][subValA]) {
+                const dataA = ideologyDatabase[valA][subValA];
+                if (dataA.theme) {
+                    subThemeHexA = dataA.theme.hex;
+                    subLabelHexA = subThemeHexA;
+                }
+            } else if (valA) {
+                // Main category is selected, let's color subSelect with a semi-transparent version, or matching themeHexA
+                subThemeHexA = themeHexA + '30'; 
+                subLabelHexA = '#52525b';
+            }
+
+            // Apply style dynamically
+            mainSelect.style.setProperty('border', `1px solid ${valA ? themeHexA : '#27272a'}`, 'important');
+            mainSelect.style.setProperty('color', valA ? themeHexA : '#ffffff', 'important');
+            const mainLabel = mainSelect.previousElementSibling;
+            if (mainLabel) {
+                mainLabel.style.color = valA ? labelHexA : '#71717a';
+            }
+            
+            subSelect.style.setProperty('border', `1px solid ${subValA ? subThemeHexA : (valA ? themeHexA + '30' : '#27272a')}`, 'important');
+            subSelect.style.setProperty('color', subValA ? subThemeHexA : '#ffffff', 'important');
+            const subLabel = subSelect.previousElementSibling;
+            if (subLabel) {
+                subLabel.style.color = subValA ? subLabelHexA : '#71717a';
+            }
+
+            // Left side (B)
+            const mainSelectB = document.getElementById('mainTypeB');
+            const subSelectB = document.getElementById('subTypeB');
+            if (mainSelectB && subSelectB) {
+                let themeHexB = '#27272a';
+                let labelHexB = '#71717a';
+                const valB = mainSelectB.value;
+                if (valB && ideologyDatabase[valB]) {
+                    const firstSubB = Object.keys(ideologyDatabase[valB])[0];
+                    if (firstSubB && ideologyDatabase[valB][firstSubB]?.theme) {
+                        themeHexB = ideologyDatabase[valB][firstSubB].theme.hex;
+                        labelHexB = themeHexB;
+                    }
+                }
+                
+                const subValB = subSelectB.value;
+                let subThemeHexB = '#27272a';
+                let subLabelHexB = '#71717a';
+                if (valB && subValB && ideologyDatabase[valB][subValB]) {
+                    const dataB = ideologyDatabase[valB][subValB];
+                    if (dataB.theme) {
+                        subThemeHexB = dataB.theme.hex;
+                        subLabelHexB = subThemeHexB;
+                    }
+                } else if (valB) {
+                    subThemeHexB = themeHexB + '30';
+                    subLabelHexB = '#52525b';
+                }
+                
+                mainSelectB.style.setProperty('border', `1px solid ${valB ? themeHexB : '#27272a'}`, 'important');
+                mainSelectB.style.setProperty('color', valB ? themeHexB : '#ffffff', 'important');
+                const mainLabelB = mainSelectB.previousElementSibling;
+                if (mainLabelB) {
+                    mainLabelB.style.color = valB ? labelHexB : '#71717a';
+                }
+                
+                subSelectB.style.setProperty('border', `1px solid ${subValB ? subThemeHexB : (valB ? themeHexB + '30' : '#27272a')}`, 'important');
+                subSelectB.style.setProperty('color', subValB ? subThemeHexB : '#ffffff', 'important');
+                const subLabelB = subSelectB.previousElementSibling;
+                if (subLabelB) {
+                    subLabelB.style.color = subValB ? subLabelHexB : '#71717a';
+                }
+            }
+        }
+
+        async function runAiAnalysis(name, desc) {
+            const panel = document.getElementById('aiAnalysisPanel');
+            const content = document.getElementById('aiContent');
+            
+            panel.classList.remove('hidden');
+            content.innerHTML = '<div class="flex items-center gap-3 text-blue-400 animate-pulse mono">[NEURAL_PROCESSOR_ENGAGED]...</div>';
+            
+            google.script.run
+                .withSuccessHandler((response) => {
+                    content.innerHTML = marked.parse(response);
+                })
+                .withFailureHandler((err) => {
+                    content.innerHTML = `<div class="text-red-500 mono">ERROR: ${err}</div>`;
+                })
+                .analyzeIdeology(name, desc);
+        }
+
+        async function runAiComparison(nameA, descA, nameB, descB) {
+            const panel = document.getElementById('aiAnalysisPanel');
+            const content = document.getElementById('aiContent');
+            
+            panel.classList.remove('hidden');
+            content.innerHTML = '<div class="flex items-center gap-3 text-cyan-400 animate-pulse mono">[NEURAL_COMPARATIVE_PROCESSOR_ENGAGED]...</div>';
+            
+            google.script.run
+                .withSuccessHandler((response) => {
+                    content.innerHTML = marked.parse(response);
+                })
+                .withFailureHandler((err) => {
+                    content.innerHTML = `<div class="text-red-500 mono">ERROR: ${err}</div>`;
+                })
+                .compareIdeologies(nameA, descA, nameB, descB);
+        }
+
+        function loadFigureWithProxy(rawUrl, imgId, loaderId, errorId) {
+            const figureImg = document.getElementById(imgId);
+            const loader = document.getElementById(loaderId);
+            const errorOverlay = document.getElementById(errorId);
+            if (!figureImg) return;
+            
+            const cleanUrl = rawUrl.replace(/^https?:\/\//, '');
+            const proxies = [
+                rawUrl,
+                `https://wsrv.nl/?url=${encodeURIComponent(rawUrl)}&w=400`,
+                `https://i0.wp.com/${cleanUrl}?w=400`,
+                `https://images.weserv.nl/?url=${encodeURIComponent(rawUrl)}&w=400`
+            ];
+            
+            let currentProxyIndex = 0;
+            if (loader) loader.classList.remove('hidden');
+            if (errorOverlay) errorOverlay.classList.add('hidden');
+            figureImg.style.opacity = '0';
+
+            const tryLoad = () => {
+                if (currentProxyIndex >= proxies.length) {
+                    if (loader) loader.classList.add('hidden');
+                    if (errorOverlay) errorOverlay.classList.remove('hidden');
+                    return;
+                }
+
+                const testImg = new Image();
+                testImg.onload = () => {
+                    figureImg.src = proxies[currentProxyIndex];
+                    figureImg.style.opacity = '1';
+                    if (loader) loader.classList.add('hidden');
+                };
+                testImg.onerror = () => {
+                    currentProxyIndex++;
+                    tryLoad();
+                };
+                testImg.src = proxies[currentProxyIndex];
+            };
+
+            tryLoad();
+        }
+
+        function selectNode(mainTypeStr, subTypeStr) {
+            let selectId = 'mainType';
+            let subSelectId = 'subType';
+            
+            if (isComparisonMode) {
+                // If Slot A is already filled, put it in Slot B!
+                const valA = document.getElementById('mainType').value;
+                const subValA = document.getElementById('subType').value;
+                if (valA && subValA && (valA !== mainTypeStr || subValA !== subTypeStr)) {
+                    selectId = 'mainTypeB';
+                    subSelectId = 'subTypeB';
+                }
+            }
+            
+            const mainSelect = document.getElementById(selectId);
+            if (mainSelect) {
+                mainSelect.value = mainTypeStr;
+                mainSelect.dispatchEvent(new Event('change'));
+                
+                setTimeout(() => {
+                    const subSelect = document.getElementById(subSelectId);
+                    if (subSelect) {
+                        subSelect.value = subTypeStr;
+                        subSelect.dispatchEvent(new Event('change'));
+                        
+                        document.getElementById('ideologyForm').scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                }, 50);
+            }
+        }
+
+        function renderIdeologyMap() {
+            const container = document.getElementById('ideologyMap');
+            container.innerHTML = '';
+            
+            Object.entries(ideologyDatabase).forEach(([main, subsObj]) => {
+                const firstSubKey = Object.keys(subsObj)[0];
+                const theme = (firstSubKey && subsObj[firstSubKey].theme) || { hex: "#ff4d00" };
+                const hexColor = theme.hex;
+
+                const card = document.createElement('div');
+                card.className = 'p-6 ideology-node cursor-pointer h-full animate-in fade-in duration-300 transition-all';
+                card.style.border = `1px solid ${hexColor}30`;
+                
+                card.innerHTML = `
+                    <h3 class="font-bold text-xs mb-4 flex items-center gap-2 mono" style="color: ${hexColor}">
+                        <span class="w-1.5 h-1.5" style="background-color: ${hexColor}"></span> ${main.toUpperCase()}
+                    </h3>
+                    <div class="flex flex-wrap gap-2">
+                        ${Object.keys(subsObj).map(sub => `
+                            <span class="text-[10px] px-2 py-1 transition-all mono cursor-pointer font-medium" 
+                                  style="border: 1px solid ${hexColor}40; background-color: ${hexColor}0d; color: ${hexColor}cc"
+                                  onmouseover="this.style.borderColor='${hexColor}'; this.style.backgroundColor='${hexColor}25'; this.style.color='#ffffff'; this.style.boxShadow='0 0 10px ${hexColor}30';"
+                                  onmouseout="this.style.borderColor='${hexColor}40'; this.style.backgroundColor='${hexColor}0d'; this.style.color='${hexColor}cc'; this.style.boxShadow='none';"
+                                  onclick="selectNode('${main.replace(/'/g, "\\'")}', '${sub.replace(/'/g, "\\'")}')"
+                                  title="${subsObj[sub].desc}">
+                                ${sub}
+                            </span>
+                        `).join('')}
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        document.getElementById('ideologyForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const submitBtn = document.getElementById('submitBtn');
+            const mainType = document.getElementById('mainType').value;
+            const subType = document.getElementById('subType').value;
+            const notes = document.getElementById('notes').value;
+
+            if (!mainType || !subType) return;
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = '[SCANNING_DATABASE_NODES]...';
+
+            google.script.run
+                .withSuccessHandler((response) => {
+                    showStatus('REPORT: QUERY_LOGGED', 'text-[var(--accent)]');
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = '開始檢索 [START_QUERY]';
+                    document.getElementById('ideologyForm').reset();
+                    document.getElementById('ideologyIntro').classList.add('hidden');
+                    refreshHistory();
+                })
+                .saveIdeology({ mainType, subType, notes });
+        });
+
+        function showStatus(msg, colorClass) {
+            const statusMsg = document.getElementById('statusMsg');
+            statusMsg.textContent = msg;
+            statusMsg.className = `mt-4 text-[10px] font-mono text-center ${colorClass}`;
+            statusMsg.classList.remove('hidden');
+            setTimeout(() => statusMsg.classList.add('hidden'), 5000);
+        }
+
+        function refreshHistory() {
+            google.script.run
+                .withSuccessHandler((data) => {
+                    const tbody = document.getElementById('historyBody');
+                    if (!data || data.length === 0) return;
+                    tbody.innerHTML = data.reverse().map(entry => {
+                        let entryThemeHex = "#ff4d00";
+                        if (ideologyDatabase[entry.mainType]) {
+                            const firstSub = Object.keys(ideologyDatabase[entry.mainType])[0];
+                            if (firstSub && ideologyDatabase[entry.mainType][firstSub].theme) {
+                                entryThemeHex = ideologyDatabase[entry.mainType][firstSub].theme.hex;
+                            }
+                        }
+
+                        return `
+                            <tr class="border-b border-zinc-900 hover:bg-zinc-800/10 transition-colors">
+                                <td class="py-5 px-4 text-zinc-500">${new Date(entry.timestamp).toLocaleTimeString()}</td>
+                                <td class="py-5 px-4 font-bold uppercase" style="color: ${entryThemeHex}">
+                                    <span class="inline-block w-1.5 h-1.5 mr-2 rounded-full" style="background-color: ${entryThemeHex}"></span>
+                                    ${entry.mainType.split(' ')[0]}
+                                </td>
+                                <td class="py-5 px-4 text-zinc-400">${entry.subType}</td>
+                                <td class="py-5 px-4 text-right">
+                                    <span class="px-3 py-1 bg-zinc-800 text-[10px] uppercase font-bold text-center" style="border: 1px solid ${entryThemeHex}30; color: ${entryThemeHex}bb">
+                                        STORED
+                                    </span>
+                                </td>
+                            </tr>
+                        `;
+                    }).join('');
+                })
+                .getSavedEntries();
+        }
+    </script>
+</body>
+</html>

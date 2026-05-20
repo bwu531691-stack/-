@@ -1,0 +1,8 @@
+{
+  "name": "意識形態百科全書 (Ideology Encyclopedia)",
+  "description": "一個探索各種政治與社會意識形態及其子分支的互動式系統，支援資料寫入 Google 試算表。",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
