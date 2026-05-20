@@ -373,7 +373,7 @@ const CATEGORY_THEMES: Record<string, { hex: string; text: string; bg: string; b
   "未來": { name: "cyan", hex: "#06b6d4", text: "text-cyan-400", bg: "bg-cyan-500/10", border: "border-cyan-500/30", glow: "shadow-cyan-500/20" }
 };
 
-app.post("/api/run/:functionName", async (req, res) => {
+app.post("/api/action/:functionName", async (req, res) => {
   const { functionName } = req.params;
   const args = req.body.args || [];
   if (functionName === "getIdeologyData") {

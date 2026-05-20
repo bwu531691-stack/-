@@ -405,7 +405,7 @@
                             withFailureHandler: function(handler) { this._failureHandler = handler; return this; },
                             _call: async function(funcName, args) {
                                 try {
-                                    const response = await fetch(`/api/run/${funcName}`, {
+                                    const response = await fetch(`/api/action/${funcName}`, {
                                         method: 'POST',
                                         headers: { 'Content-Type': 'application/json' },
                                         body: JSON.stringify({ args })
