@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: ideology-encyclopedia
+    env: node
+    plan: free
+    buildCommand: npm run build
+    startCommand: npm run start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: GEMINI_API_KEY
+        sync: false
+        placeholder: "Insert your Gemini API key (from Google AI Studio)"
