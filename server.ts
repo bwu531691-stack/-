@@ -3,6 +3,9 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { GoogleGenAI, Type } from "@google/genai";
 import { createServer as createViteServer } from "vite";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -12,15 +15,25 @@ const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 
 app.use(express.json());
 
-// Initialize Gemini
-const ai = new GoogleGenAI({
-  apiKey: process.env.GEMINI_API_KEY,
-  httpOptions: {
-    headers: {
-      'User-Agent': 'aistudio-build',
-    }
+// Lazy helper to get Gemini client, avoiding startup crash if key is missing
+let aiClient: GoogleGenAI | null = null;
+function getAI(): GoogleGenAI {
+  const apiKey = process.env.GEMINI_API_KEY || "";
+  if (!apiKey || apiKey === "MY_GEMINI_API_KEY") {
+    throw new Error("未偵測到有效的 Gemini API 金鑰。請前往 AI Studio 的 Settings > Secrets 配置您的 GEMINI_API_KEY 環境變數。");
   }
-});
+  if (!aiClient) {
+    aiClient = new GoogleGenAI({
+      apiKey: apiKey,
+      httpOptions: {
+        headers: {
+          'User-Agent': 'aistudio-build',
+        }
+      }
+    });
+  }
+  return aiClient;
+}
 
 let mockSpreadsheet: any[] = [];
 
@@ -399,7 +412,7 @@ app.post("/api/action/:functionName", async (req, res) => {
   } else if (functionName === "analyzeIdeology") {
     const [name, desc] = args;
     try {
-      const response = await ai.models.generateContent({
+      const response = await getAI().models.generateContent({
         model: "gemini-3-flash-preview",
         contents: `你是一個硬核政治學與歷史學分析專家。
 請針對以下意識形態進行深度解析：
@@ -414,13 +427,13 @@ app.post("/api/action/:functionName", async (req, res) => {
 請使用專業、中性但具有批判性的硬核工業風格語氣，並以 Markdown 格式回覆。`,
       });
       res.json({ status: "success", data: response.text });
-    } catch (error) {
-      res.status(500).json({ status: "error", message: String(error) });
+    } catch (error: any) {
+      res.status(500).json({ status: "error", message: error.message || String(error) });
     }
   } else if (functionName === "compareIdeologies") {
     const [nameA, descA, nameB, descB] = args;
     try {
-      const response = await ai.models.generateContent({
+      const response = await getAI().models.generateContent({
         model: "gemini-3-flash-preview",
         contents: `你是一個硬核政治學與歷史學分析專家。
 請針對以下兩個意識形態進行「對比與共振檢索分析」：
@@ -435,8 +448,8 @@ app.post("/api/action/:functionName", async (req, res) => {
 請使用專業、中性但具有批判性的硬核工業風格語氣，並以 Markdown 格式回覆。`,
       });
       res.json({ status: "success", data: response.text });
-    } catch (error) {
-      res.status(500).json({ status: "error", message: String(error) });
+    } catch (error: any) {
+      res.status(500).json({ status: "error", message: error.message || String(error) });
     }
   } else if (functionName === "saveIdeology") {
     const entry = { timestamp: new Date().toISOString(), ...args[0] };
