@@ -8,6 +8,7 @@
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -194,27 +195,40 @@
     <!-- 頂部導覽列 -->
     <nav class="border-b-4 border-zinc-850 bg-zinc-900 sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-6">
-            <div class="flex justify-between h-20 items-center">
+            <div class="flex flex-col md:flex-row justify-between md:h-20 py-4 md:py-0 items-center gap-4">
                 <div class="flex items-center gap-6">
-                    <div class="w-12 h-12 bg-white flex items-center justify-center text-black font-black">
-                        <span class="text-xl">ID</span>
+                    <div class="w-10 h-10 bg-white flex items-center justify-center text-black font-black shrink-0">
+                        <span class="text-lg">ID</span>
                     </div>
                     <div>
-                        <span class="text-2xl font-black tracking-tighter text-white mono">IDEOLOGY.DB_VER_2.8</span>
-                        <span class="block text-[10px] text-[var(--accent)] font-mono uppercase tracking-widest opacity-80">Industrial Data Node</span>
+                        <span class="text-xl font-black tracking-tighter text-white mono">IDEOLOGY.DB_VER_3.0</span>
+                        <span class="block text-[10px] text-[var(--accent)] font-mono uppercase tracking-widest opacity-80">Industrial Interface Node</span>
                     </div>
                 </div>
-                <div class="hidden md:flex items-center gap-8 text-xs font-bold tracking-tighter mono">
-                    <div class="flex items-center gap-3">
-                        <label class="text-zinc-500">TWIN_QUERY_MODE</label>
-                        <button id="toggleComparison" class="w-10 h-5 bg-zinc-800 rounded-full relative transition-all border border-zinc-700">
-                            <div class="dot w-3 h-3 bg-zinc-500 rounded-full absolute top-1 left-1 pb-0 transition-all"></div>
-                        </button>
-                    </div>
-                    <div class="flex items-center gap-4 text-zinc-600">
-                        <span class="animate-pulse">●</span>
-                        <span>SECURE_CONNECTION_ESTABLISHED</span>
-                    </div>
+                <!-- Tab Switching Panel -->
+                <div class="flex items-center flex-wrap gap-1 md:gap-3 font-bold tracking-tighter mono text-xs">
+                    <button onclick="switchTab('database')" id="tabBtn-database" class="px-3 md:px-4 py-2 text-[var(--accent)] border-b-2 border-[var(--accent)] hover:text-white transition-all">
+                        [01_DATABASE_CORE] 索引核心
+                    </button>
+                    <button onclick="switchTab('spectrum')" id="tabBtn-spectrum" class="px-3 md:px-4 py-2 text-zinc-500 border-b-2 border-transparent hover:text-white transition-all">
+                        [02_SPECTRUM_COMPASS] 象限光譜
+                    </button>
+                    <button onclick="switchTab('scenario')" id="tabBtn-scenario" class="px-3 md:px-4 py-2 text-zinc-500 border-b-2 border-transparent hover:text-white transition-all">
+                        [03_SCENARIO_SIM] 沙盤推演
+                    </button>
+                    <button onclick="switchTab('matrix')" id="tabBtn-matrix" class="px-3 md:px-4 py-2 text-zinc-500 border-b-2 border-transparent hover:text-white transition-all">
+                        [04_MATRIX_COMPARE] 陣營對抗
+                    </button>
+                    <button onclick="switchTab('genealogy')" id="tabBtn-genealogy" class="px-3 md:px-4 py-2 text-zinc-500 border-b-2 border-transparent hover:text-white transition-all">
+                        [05_GENEALOGY_TREE] 思想譜系
+                    </button>
+                    <button onclick="switchTab('propaganda')" id="tabBtn-propaganda" class="px-3 md:px-4 py-2 text-zinc-500 border-b-2 border-transparent hover:text-white transition-all">
+                        [06_PROPAGANDA_LAB] 宣傳共鳴
+                    </button>
+                </div>
+                <div class="hidden lg:flex items-center gap-4 text-[10px] text-zinc-650 tracking-tighter mono">
+                    <span class="animate-pulse text-green-500">●</span>
+                    <span>CHANNEL_SECURED</span>
                 </div>
             </div>
         </div>
@@ -237,7 +251,20 @@
             </div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
+        <!-- Tab 1: Database View Core -->
+        <div id="tabContentDatabase" class="tab-content animate-in fade-in duration-300">
+            <!-- Mode Config Header -->
+            <div class="mb-10 p-5 bg-zinc-900/30 border border-zinc-800/60 flex flex-col sm:flex-row justify-between items-center gap-4">
+                <span class="text-xs font-mono text-zinc-500 uppercase tracking-wider">// SPECTRUM_CORE_DECODE_SESSION: ENCRYPTED</span>
+                <div class="flex items-center gap-3 text-xs font-bold tracking-tighter mono">
+                    <span class="text-zinc-500">TWIN_QUERY_MODE (雙軌比較模式)</span>
+                    <button id="toggleComparison" class="w-10 h-5 bg-zinc-800 rounded-full relative transition-all border border-zinc-700">
+                        <div class="dot w-3 h-3 bg-zinc-500 rounded-full absolute top-1 left-1 pb-0 transition-all"></div>
+                    </button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
             
             <!-- 左側：輸入與百科詳解 (佔 5 欄) -->
             <div class="lg:col-span-5 space-y-12">
@@ -363,6 +390,390 @@
 
             </div>
         </div>
+        </div> <!-- End Tab 1: tabContentDatabase -->
+
+        <!-- Tab 2: Spectrum Compass Mapping -->
+        <div id="tabContentSpectrum" class="tab-content hidden animate-in fade-in duration-300">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
+                <!-- Left: Compass SVG Grid (佔 7 欄) -->
+                <div class="lg:col-span-7 space-y-6">
+                    <div class="industrial-panel">
+                        <h2 class="section-header text-xl">
+                            <span class="dot"></span> 核心思想政治經濟象限儀 [COMPASS_VISUALIZER]
+                        </h2>
+                        <p class="text-xs text-zinc-500 mono mb-6 uppercase">// X-AXIS: 自由市場市場經濟度 (0%-100%) | Y-AXIS: 主權個體自由度 (0%-100%)</p>
+                        
+                        <!-- Political Compass SVG Container -->
+                        <div class="relative w-full aspect-square border border-zinc-800 bg-[#121316] overflow-hidden select-none" id="compassContainer">
+                            <svg class="w-full h-full" viewBox="0 0 500 500" id="compassSvg">
+                                <!-- Top Left: Libertarian Socialist -->
+                                <rect x="30" y="30" width="220" height="220" fill="#10b981" fill-opacity="0.015" stroke="#10b981" stroke-width="0.5" stroke-dasharray="3,6" />
+                                <text x="40" y="45" fill="#10b981" fill-opacity="0.4" class="mono text-[9px] uppercase font-bold tracking-wider">Libertarian Left / 自由意志左翼</text>
+                                
+                                <!-- Top Right: Libertarian Capitalist -->
+                                <rect x="250" y="30" width="220" height="220" fill="#eab308" fill-opacity="0.015" stroke="#eab308" stroke-width="0.5" stroke-dasharray="3,6" />
+                                <text x="260" y="45" fill="#eab308" fill-opacity="0.4" class="mono text-[9px] uppercase font-bold tracking-wider">Libertarian Right / 自由意志右翼</text>
+                                
+                                <!-- Bottom Left: Authoritarian Socialist -->
+                                <rect x="30" y="250" width="220" height="220" fill="#ef4444" fill-opacity="0.015" stroke="#ef4444" stroke-width="0.5" stroke-dasharray="3,6" />
+                                <text x="40" y="480" fill="#ef4444" fill-opacity="0.4" class="mono text-[9px] uppercase font-bold tracking-wider">Authoritarian Left / 威權左翼</text>
+                                
+                                <!-- Bottom Right: Authoritarian Capitalist -->
+                                <rect x="250" y="250" width="220" height="220" fill="#3b82f6" fill-opacity="0.015" stroke="#3b82f6" stroke-width="0.5" stroke-dasharray="3,6" />
+                                <text x="260" y="480" fill="#3b82f6" fill-opacity="0.4" class="mono text-[9px] uppercase font-bold tracking-wider">Authoritarian Right / 威權右翼</text>
+
+                                <!-- Axes -->
+                                <line x1="250" y1="15" x2="250" y2="485" stroke="#4f5058" stroke-width="1.5" />
+                                <polygon points="250,5 246,15 254,15" fill="#4f5058" />
+                                <polygon points="250,495 246,485 254,485" fill="#4f5058" />
+                                
+                                <line x1="15" y1="250" x2="485" y2="250" stroke="#4f5058" stroke-width="1.5" />
+                                <polygon points="495,250 485,246 485,254" fill="#4f5058" />
+                                <polygon points="5,250 15,246 15,254" fill="#4f5058" />
+
+                                <!-- Label Axes -->
+                                <text x="258" y="22" fill="#a1a1aa" class="mono text-[8px] font-bold uppercase tracking-widest">個體自由 [LIBERTY+]</text>
+                                <text x="258" y="488" fill="#52525b" class="mono text-[8px] font-bold uppercase tracking-widest">集體秩序 [ORDER/AUTHORITY+]</text>
+                                <text x="390" y="244" fill="#a1a1aa" class="mono text-[8px] font-bold uppercase tracking-widest text-right">自由市場 [MARKET+]</text>
+                                <text x="20" y="244" fill="#52525b" class="mono text-[8px] font-bold uppercase tracking-widest">計劃集體 [PLANNING+]</text>
+                                
+                                <!-- Grid divisions -->
+                                <circle cx="250" cy="250" r="110" fill="none" stroke="#2a2b30" stroke-width="1" stroke-dasharray="2,4" />
+                                <circle cx="250" cy="250" r="220" fill="none" stroke="#2a2b30" stroke-width="1" stroke-dasharray="2,4" />
+
+                                <!-- Dynamic Plotted Circles Group -->
+                                <g id="compassGroup">
+                                    <!-- Populated by JavaScript -->
+                                </g>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Right: Node inspector -->
+                <div class="lg:col-span-5 space-y-6">
+                    <div class="industrial-panel min-h-[500px] flex flex-col justify-between" id="compassInspector">
+                        <div>
+                            <h2 class="section-header text-xl">
+                                <span class="dot"></span> 節點光譜定位儀 [INSPECTOR_LOCK]
+                            </h2>
+                            
+                            <div id="inspectorDefault" class="space-y-6 text-zinc-500 text-sm mono py-10 text-center">
+                                <div class="w-16 h-16 border-2 border-dashed border-zinc-700 rounded-full animate-spin mx-auto flex items-center justify-center mb-6">
+                                    <div class="w-2 h-2 bg-zinc-500 rounded-full animate-ping"></div>
+                                </div>
+                                <p class="animate-pulse">[AWAITING_RADAR_LOCK]...</p>
+                                <p class="text-[11px] text-zinc-650 leading-relaxed max-w-xs mx-auto">
+                                    請點擊左側光譜象限儀中的任意思想點標，以載入該思想分支之核心座標、描述數據、思想家名單及代理影像。
+                                </p>
+                            </div>
+                            
+                            <div id="inspectorView" class="hidden space-y-6 animate-in fade-in duration-300">
+                                <!-- Dynamic metadata filled by JS -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 3: Sandbox Scenario Simulator -->
+        <div id="tabContentScenario" class="tab-content hidden animate-in fade-in duration-300">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
+                <!-- Left: Control Workbench (佔 5 欄) -->
+                <div class="lg:col-span-5 space-y-6">
+                    <div class="industrial-panel">
+                        <h2 class="section-header text-xl">
+                            <span class="dot"></span> 思想推演控制台 [SIMU_CONSOLE]
+                        </h2>
+                        
+                        <form id="scenarioForm" class="space-y-6 text-sm">
+                            <div class="space-y-2">
+                                <label class="block text-xs font-bold text-zinc-500 uppercase mono">01_選擇思想類別 [CHOOSE_CLASS]</label>
+                                <select id="simMainType" class="w-full text-white focus:ring-0 outline-none transition-all appearance-none" required>
+                                    <option value="">AWAITING_DATA...</option>
+                                </select>
+                            </div>
+                            
+                            <div class="space-y-2">
+                                <label class="block text-xs font-bold text-zinc-500 uppercase mono">02_選擇特定子分支 [CHOOSE_SUB_BRANCH]</label>
+                                <select id="simSubType" class="w-full text-white focus:ring-0 outline-none transition-all appearance-none" required>
+                                    <option value="">AWAITING_CLASS_SELECTION...</option>
+                                </select>
+                            </div>
+                            
+                            <div class="space-y-2">
+                                <label class="block text-xs font-bold text-zinc-500 uppercase mono">03_歷史/未來變革衝突 [CRISIS_SCENARIO]</label>
+                                <select id="simScenario" class="w-full text-white focus:ring-0 outline-none transition-all appearance-none" required>
+                                    <option value="AI 奇點爆發與全自動生產 (AI Singularity & Cyber-Automation)">AI 奇點爆發與全自動生產 (AI Singularity)</option>
+                                    <option value="全球氣候潰決與生存資源崩塌 (Climate Catastrophe & Resource Collapse)">全球氣候潰決與生存資源崩塌 (Climate Catastrophe)</option>
+                                    <option value="數位威權監視與神經網絡主權 (Digital Panopticon & Neural Sovereignty)">數位威權監視與神經網絡主權 (Digital Panopticon)</option>
+                                    <option value="外星智慧生命第一接觸 (First Contact with Alien Intelligence)">外星智慧生命第一接觸 (First Contact)</option>
+                                    <option value="星際殖民擴展與新行星資源爭奪 (Cosmic Expansion & Core planetary war)">星際殖民擴展與新行星資源爭奪 (Cosmic Expansion)</option>
+                                    <option value="自訂推演情境">自訂推演情境 (Custom Scenario)...</option>
+                                </select>
+                            </div>
+                            
+                            <!-- Custom Scenario Container -->
+                            <div id="customScenarioContainer" class="space-y-2 hidden animate-in slide-in-from-top duration-300">
+                                <label class="block text-xs font-bold text-zinc-500 uppercase mono">03B_自訂危機/推演情境 [CUSTOM_CONTEXT]</label>
+                                <textarea id="simCustomText" rows="3" class="w-full text-white outline-none transition-all text-xs" placeholder="定義您的極限測試情境，例如：人類全面數位永生並廢除物理肉身、核融合技術免費普及但貨幣遭廢除..."></textarea>
+                            </div>
+                            
+                            <div class="space-y-3">
+                                <label class="block text-xs font-bold text-zinc-500 uppercase mono">04_危機干預深度 / 權力震盪度 [IMPACT_LEVEL]</label>
+                                <div class="grid grid-cols-3 gap-2">
+                                    <label class="border border-zinc-800 bg-zinc-950/20 p-3 text-center cursor-pointer hover:border-zinc-500 transition-all text-xs flex flex-col justify-between items-center group">
+                                        <input type="radio" name="simSeverity" value="微幅震盪 (Minor adaptive friction)" class="hidden" checked>
+                                        <span class="mono text-zinc-500 group-hover:text-white font-black block text-[11px] mb-1">LV.1</span>
+                                        <span class="text-[9px] text-zinc-400">微幅摩擦</span>
+                                    </label>
+                                    <label class="border border-zinc-800 bg-zinc-950/20 p-3 text-center cursor-pointer hover:border-[#ff4d00]/50 transition-all text-xs flex flex-col justify-between items-center group">
+                                        <input type="radio" name="simSeverity" value="中度整合 (Medium structural shift)" class="hidden">
+                                        <span class="mono text-zinc-500 group-hover:text-white font-black block text-[11px] mb-1">LV.2</span>
+                                        <span class="text-[9px] text-zinc-400">中度改組</span>
+                                    </label>
+                                    <label class="border border-zinc-800 bg-zinc-950/20 p-3 text-center cursor-pointer hover:border-[#ff4d00] transition-all text-xs flex flex-col justify-between items-center group">
+                                        <input type="radio" name="simSeverity" value="極端重構 (Radical system collapse & reconfiguration)" class="hidden">
+                                        <span class="mono text-zinc-500 group-hover:text-white font-black block text-[11px] mb-1">LV.3</span>
+                                        <span class="text-[9px] text-zinc-400">極致重構</span>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <button type="submit" id="simSubmitBtn" class="tech-button py-3 mt-4 text-xs font-black">
+                                啟動系統沙盤推演 [ENGAGE_PROJECTION]
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- Right: Simulation Terminal Log Output (佔 7 欄) -->
+                <div class="lg:col-span-7 space-y-6">
+                    <div class="industrial-panel">
+                        <h2 class="section-header text-xl">
+                            <span class="dot"></span> 推演核心神經終端機 [PROJECTION_TERMINAL]
+                        </h2>
+                        
+                        <div class="bg-[#0b0c0f] border border-zinc-800 p-6 min-h-[520px] flex flex-col justify-between relative shadow-2xl">
+                            <div class="absolute top-2 right-4 text-[9px] font-mono text-zinc-650 select-none">// NEURAL_SIMULATION_MATRIX_CORE</div>
+                            
+                            <!-- Logs Console Area -->
+                            <div class="flex-1 overflow-y-auto max-h-[580px] mb-6 custom-scrollbar space-y-4">
+                                <div id="simLogs" class="text-zinc-500 font-mono text-xs space-y-1.5 selection:bg-[var(--accent)]/40 selection:text-white leading-relaxed">
+                                    <span class="block text-zinc-600 animate-pulse">// SYSTEM_STANDBY: Awaiting parameters input... ready.</span>
+                                </div>
+                                <div id="simMarkdown" class="markdown-body p-1 hidden select-text">
+                                    <!-- Markdown content goes here -->
+                                </div>
+                            </div>
+                            
+                            <!-- Prompt status bar -->
+                            <div class="border-t border-zinc-900 pt-4 flex flex-col sm:flex-row justify-between items-center text-[10px] font-mono gap-4">
+                                <span class="text-zinc-600" id="simStatusBar">// ENGINE: GEMINI_3.5_FLASH // SECURE_AI_CHANNEL</span>
+                                <div class="flex flex-wrap gap-2 justify-end">
+                                    <button type="button" id="downloadSimPDF" class="hidden px-4 py-2 bg-zinc-900 text-[9px] text-[var(--accent)] font-bold border border-zinc-800 hover:bg-[var(--accent)] hover:text-black hover:border-transparent transition-all">
+                                        下載 PDF 報告 [EXPORT_PDF]
+                                    </button>
+                                    <button type="button" id="saveSimReport" class="hidden px-4 py-2 bg-zinc-900 text-[9px] text-[var(--accent)] font-bold border border-zinc-800 hover:bg-[var(--accent)] hover:text-black hover:border-transparent transition-all">
+                                        存檔至系統日誌 [SAVE_LOG_RUN]
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 4: Multi-Ideology Clash & Coalition Matrix -->
+        <div id="tabContentMatrix" class="tab-content hidden animate-in fade-in duration-300">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
+                <!-- Left Control Unit (5 cols) -->
+                <div class="lg:col-span-5 space-y-6">
+                    <div class="industrial-panel bg-zinc-900/40 p-6 border border-zinc-800">
+                        <h2 class="section-header text-xl text-white font-black mb-4">
+                            <span class="dot"></span> 多邊對抗與聯盟矩陣 [MATRIX_MATRIX]
+                        </h2>
+                        <p class="text-[11px] text-zinc-500 mono mb-4 uppercase">// SELECT 2-4 IDEOLOGIES AND A BACKGROUND TO INITIATE BATTLEGROUND TESTING</p>
+                        
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-bold text-zinc-500 uppercase mono mb-2">01_選擇多邊思想流派 (可複選 2-4 個)</label>
+                                <div class="max-h-60 overflow-y-auto border border-zinc-800 bg-[#0c0d10] p-3 rounded space-y-2 custom-scrollbar text-xs" id="matrixSelectorGrid">
+                                    <!-- Populated dynamically -->
+                                </div>
+                            </div>
+
+                            <div class="space-y-2">
+                                <label class="block text-xs font-bold text-zinc-500 uppercase mono">02_地緣或制度衝突背景 [CRISIS_BACKGROUND]</label>
+                                <select id="matrixScenario" class="w-full text-white bg-zinc-950/80 border border-zinc-800 p-2 text-xs focus:ring-1 focus:ring-[var(--accent)] outline-none transition-all appearance-none">
+                                    <option value="全球大蕭條與資源絕對枯竭 (Global Depletion & Severe Survival Catastrophe)">全球大蕭條與資源絕對枯竭 (Global Depletion)</option>
+                                    <option value="超智機器與全自動化生產權力爭奪 (Autonomous Machine Hegemony & Cyber Rebellion)">超智機器取代全體實體政權 (Machine Hegemony)</option>
+                                    <option value="無政府高科技軍閥割據與新中世紀政體 (Neo-Feudal Warlords & Fragmentation)">無政府高科技軍閥割據時代 (Neo-Feudal Warlords)</option>
+                                    <option value="群星探索時代與外海星行星主權與資源開採產權衝突 (Planetary Claim Wars & Space Hegemony)">群星探索與地外行星資源爭奪 (Planetary Claim Wars)</option>
+                                </select>
+                            </div>
+
+                            <button type="button" id="matrixSubmitBtn" class="tech-button py-3 mt-4 text-xs font-black w-full bg-[var(--accent)] hover:bg-[var(--accent)]/80 text-black uppercase tracking-wider transition-all">
+                                計算陣營合縱連橫 [SIMULATE_MATRIX_CLASH]
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Terminal Console (7 cols) -->
+                <div class="lg:col-span-7 space-y-6">
+                    <div class="industrial-panel">
+                        <h2 class="section-header text-xl text-white font-black mb-4">
+                            <span class="dot"></span> 陣營對抗運算終端機 [MATRIX_TERMINAL]
+                        </h2>
+                        <div class="bg-[#0b0c0f] border border-zinc-800 p-6 min-h-[500px] flex flex-col justify-between relative shadow-2xl">
+                            <div class="absolute top-2 right-4 text-[9px] font-mono text-zinc-650 select-none">// MULTI_AGENT_GAME_THEORY_ENGINE</div>
+                            
+                            <div class="flex-1 overflow-y-auto max-h-[550px] mb-6 custom-scrollbar space-y-4">
+                                <div id="matrixLogs" class="text-zinc-500 font-mono text-xs space-y-1.5 selection:bg-[var(--accent)]/40 selection:text-white leading-relaxed">
+                                    <span class="block text-zinc-650 animate-pulse">// SYSTEM_STANDBY: Use left panel to select ideologies and start...</span>
+                                </div>
+                                <div id="matrixMarkdown" class="markdown-body p-1 hidden select-text">
+                                    <!-- Markdown filled after call -->
+                                </div>
+                            </div>
+                            
+                            <div class="border-t border-zinc-900 pt-4 flex flex-col md:flex-row justify-between items-center text-[10px] font-mono gap-4">
+                                <span class="text-zinc-600">// STABILITY_COEFFICIENT: CALCULATING</span>
+                                <button type="button" id="saveMatrixReport" class="hidden px-4 py-2 bg-zinc-900 text-[9px] text-[var(--accent)] font-bold border border-zinc-800 hover:bg-[var(--accent)] hover:text-black hover:border-transparent transition-all">
+                                    存檔至系統日誌 [SAVE_MATRIX_RUN]
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 5: Ideas Genealogy Tracker -->
+        <div id="tabContentGenealogy" class="tab-content hidden animate-in fade-in duration-300">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
+                <!-- Left selector (4 cols) -->
+                <div class="lg:col-span-4 space-y-6">
+                    <div class="industrial-panel bg-zinc-900/40 p-6 border border-zinc-800">
+                        <h2 class="section-header text-xl text-white font-black mb-4">
+                            <span class="dot"></span> 思想流派生命考古儀 [SPECIES_ARCHAEOLOGY]
+                        </h2>
+                        <p class="text-xs text-zinc-500 mono mb-6 uppercase">// TRACE PRECURSORS, GENETIC MUTATIONS, AND DEEP SPEC FUTURE OF ANY THINKING BRANCH</p>
+                        
+                        <div class="space-y-4 text-sm">
+                            <div class="space-y-1">
+                                <label class="block text-xs font-bold text-zinc-500 uppercase mono">01_選定思想流派類別 [CLASS]</label>
+                                <select id="genealogyMainType" class="w-full text-white bg-zinc-950 border border-zinc-800 p-2 text-xs focus:ring-1 focus:ring-[var(--accent)] outline-none transition-all appearance-none">
+                                    <option value="">AWAITING_DATA...</option>
+                                </select>
+                            </div>
+                            <div class="space-y-1">
+                                <label class="block text-xs font-bold text-zinc-500 uppercase mono">02_分析對象分支 [BRANCH]</label>
+                                <select id="genealogySubType" class="w-full text-white bg-zinc-950 border border-zinc-800 p-2 text-xs focus:ring-1 focus:ring-[var(--accent)] outline-none transition-all appearance-none">
+                                    <option value="">AWAITING_CLASS_SELECTION...</option>
+                                </select>
+                            </div>
+                            <button type="button" id="genealogySubmitBtn" class="tech-button py-3 mt-4 text-xs font-black w-full bg-[var(--accent)] hover:bg-[var(--accent)]/80 text-black uppercase tracking-wider transition-all">
+                                展開思想譜系溯源 [GENEALOGICAL_DECODE]
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right genealogy board (8 cols) -->
+                <div class="lg:col-span-8 space-y-6">
+                    <div class="industrial-panel">
+                        <h2 class="section-header text-xl text-white font-black mb-4">
+                            <span class="dot"></span> 觀念史進化流動樹 [EVOLUTION_FLOW]
+                        </h2>
+                        <div class="bg-[#0b0c0f] border border-zinc-800 p-6 min-h-[500px] flex flex-col justify-between relative shadow-2xl">
+                            <div class="absolute top-2 right-4 text-[9px] font-mono text-zinc-650 select-none">// MEMETIC_CLADISTICS_DISPLAY</div>
+                            
+                            <div class="flex-1 overflow-y-auto max-h-[550px] mb-6 custom-scrollbar space-y-4">
+                                <div id="genealogyLogs" class="text-zinc-500 font-mono text-xs space-y-1.5 selection:bg-[var(--accent)]/40 selection:text-white leading-relaxed">
+                                    <span class="block text-zinc-650 animate-pulse">// SYSTEM_STANDBY: Ready to trace genealogy. Select a branch from the left panel.</span>
+                                </div>
+                                <div id="genealogyMarkdown" class="markdown-body p-1 hidden select-text">
+                                    <!-- Markdown content -->
+                                </div>
+                            </div>
+                            
+                            <div class="border-t border-zinc-900 pt-4 flex flex-col md:flex-row justify-between items-center text-[10px] font-mono gap-4">
+                                <span class="text-zinc-600">// KNOWLEDGE_TAXONOMY: LOADED // SECURE</span>
+                                <button type="button" id="saveGenealogyReport" class="hidden px-4 py-2 bg-zinc-900 text-[9px] text-[var(--accent)] font-bold border border-zinc-800 hover:bg-[var(--accent)] hover:text-black hover:border-transparent transition-all">
+                                    存檔至系統日誌 [SAVE_MUTATION_RUN]
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 6: Propaganda & Framing Filter Lab -->
+        <div id="tabContentPropaganda" class="tab-content hidden animate-in fade-in duration-300">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
+                <!-- Left panel (5 cols) -->
+                <div class="lg:col-span-5 space-y-6">
+                    <div class="industrial-panel bg-zinc-900/40 p-6 border border-zinc-800">
+                        <h2 class="section-header text-xl text-white font-black mb-4">
+                            <span class="dot"></span> 宣傳戰輿論偏照鏡 [PROPAGANDA_LAB]
+                        </h2>
+                        <p class="text-xs text-zinc-500 mono mb-6 uppercase">// PASTE ANY OBJECTIVE FACT AND CHOOSE SYSTEM LENSES TO SPIN REALITY</p>
+                        
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-bold text-zinc-500 uppercase mono mb-1">01_輸入中立事實或新聞事件數據 [RAW_NEWS_FACT]</label>
+                                <textarea id="propnewsText" rows="4" class="w-full text-white bg-zinc-950 border border-zinc-800 p-2 text-xs focus:ring-1 focus:ring-[var(--accent)] outline-none transition-all" 
+                                    placeholder="例如：聯合國正式通過全球開徵 0.5% 高淨值富豪數位資產特別稅，所得將全數用於補貼極地氣候難民。"></textarea>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-zinc-500 uppercase mono mb-2">02_選擇對比觀點的陣營眼罩 (複選 2-3 個)</label>
+                                <div class="max-h-52 overflow-y-auto border border-zinc-800 bg-[#0c0d10] p-3 rounded space-y-2 custom-scrollbar text-xs" id="propSelectorGrid">
+                                    <!-- Populated dynamically -->
+                                </div>
+                            </div>
+
+                            <button type="button" id="propSubmitBtn" class="tech-button py-3 mt-4 text-xs font-black w-full bg-[var(--accent)] hover:bg-[var(--accent)]/80 text-black uppercase tracking-wider transition-all">
+                                模擬輿論扭曲與戰略射頻 [SIMULATE_NARRATIVE_SPIN]
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right output panel (7 cols) -->
+                <div class="lg:col-span-7 space-y-6">
+                    <div class="industrial-panel">
+                        <h2 class="section-header text-xl text-white font-black mb-4">
+                            <span class="dot"></span> 宣傳戰略與修辭解構 [DISCOURSE_DECONSTRUCT]
+                        </h2>
+                        <div class="bg-[#0b0c0f] border border-zinc-800 p-6 min-h-[500px] flex flex-col justify-between relative shadow-2xl">
+                            <div class="absolute top-2 right-4 text-[9px] font-mono text-zinc-650 select-none">// SPIN_DOCTOR_COGNITIVE_ARRAY</div>
+                            
+                            <div class="flex-1 overflow-y-auto max-h-[550px] mb-6 custom-scrollbar space-y-4">
+                                <div id="propLogs" class="text-zinc-500 font-mono text-xs space-y-1.5 selection:bg-[var(--accent)]/40 selection:text-white leading-relaxed">
+                                    <span class="block text-zinc-650 animate-pulse">// SYSTEM_STANDBY: Use left panel to write facts, select lenses, and start spinning...</span>
+                                </div>
+                                <div id="propMarkdown" class="markdown-body p-1 hidden select-text">
+                                    <!-- Output Markdown display -->
+                                </div>
+                            </div>
+                            
+                            <div class="border-t border-zinc-900 pt-4 flex flex-col md:flex-row justify-between items-center text-[10px] font-mono gap-4">
+                                <span class="text-zinc-600">// MEDIA_HEGEMONY: LEVEL_DECOY // SECURE</span>
+                                <button type="button" id="savePropReport" class="hidden px-4 py-2 bg-zinc-900 text-[9px] text-[var(--accent)] font-bold border border-zinc-800 hover:bg-[var(--accent)] hover:text-black hover:border-transparent transition-all">
+                                    存檔至系統日誌 [SAVE_PROPAGANDA_RUN]
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </main>
 
     <footer class="bg-zinc-900 py-20 border-t-8 border-zinc-800">
@@ -420,11 +831,15 @@
                                     if (this._failureHandler) this._failureHandler(error);
                                 }
                             },
-                            getIdeologyData: function() { this._call('getIdeologyData', []); },
-                            saveIdeology: function(data) { this._call('saveIdeology', [data]); },
-                            getSavedEntries: function() { this._call('getSavedEntries', []); },
-                            analyzeIdeology: function(name, desc) { this._call('analyzeIdeology', [name, desc]); },
-                            compareIdeologies: function(nameA, descA, nameB, descB) { this._call('compareIdeologies', [nameA, descA, nameB, descB]); }
+                             getIdeologyData: function() { this._call('getIdeologyData', []); },
+                             saveIdeology: function(data) { this._call('saveIdeology', [data]); },
+                             getSavedEntries: function() { this._call('getSavedEntries', []); },
+                             analyzeIdeology: function(name, desc) { this._call('analyzeIdeology', [name, desc]); },
+                             compareIdeologies: function(nameA, descA, nameB, descB) { this._call('compareIdeologies', [nameA, descA, nameB, descB]); },
+                             simulateScenario: function(subTypeVal, desc, scenarioVal, customVal, severityVal) { this._call('simulateScenario', [subTypeVal, desc, scenarioVal, customVal, severityVal]); },
+                             matrixCompare: function(ideologyList, scenarioVal) { this._call('matrixCompare', [ideologyList, scenarioVal]); },
+                             genealogyTree: function(subVal, desc) { this._call('genealogyTree', [subVal, desc]); },
+                             propagandaSpin: function(factText, selectedFactions) { this._call('propagandaSpin', [factText, selectedFactions]); }
                         };
                     },
                     withSuccessHandler: function(handler) { return this._createRunner().withSuccessHandler(handler); },
@@ -1146,6 +1561,885 @@
                 })
                 .getSavedEntries();
         }
+
+        // ==========================================
+        // MULTI-TAB NAVIGATION SYSTEM (ADDED TABS)
+        // ==========================================
+        let currentTab = 'database';
+
+        function switchTab(tabId) {
+            currentTab = tabId;
+            const tabs = ['database', 'spectrum', 'scenario', 'matrix', 'genealogy', 'propaganda'];
+            
+            // Toggle active classes on tab buttons
+            tabs.forEach(t => {
+                const btn = document.getElementById(`tabBtn-${t}`);
+                const content = document.getElementById(`tabContent${t.charAt(0).toUpperCase() + t.slice(1)}`);
+                
+                if (t === tabId) {
+                    if (btn) btn.className = "px-3 md:px-4 py-2 text-[var(--accent)] border-b-2 border-[var(--accent)] hover:text-white transition-all font-bold tracking-tighter mono text-xs";
+                    if (content) content.classList.remove('hidden');
+                } else {
+                    if (btn) btn.className = "px-3 md:px-4 py-2 text-zinc-500 border-b-2 border-transparent hover:text-white transition-all font-bold tracking-tighter mono text-xs";
+                    if (content) content.classList.add('hidden');
+                }
+            });
+
+            // Specific tab initialization
+            if (tabId === 'spectrum') {
+                renderCompassPoints();
+            } else if (tabId === 'scenario') {
+                populateSimulationDropdowns();
+            } else if (tabId === 'matrix') {
+                populateMatrixSelector();
+            } else if (tabId === 'genealogy') {
+                populateGenealogyDropdowns();
+            } else if (tabId === 'propaganda') {
+                populatePropagandaSelector();
+            }
+        }
+
+        // ==========================================
+        // TAB 2: SPECTRUM COMPASS CONTROLLER
+        // ==========================================
+        function renderCompassPoints() {
+            const group = document.getElementById('compassGroup');
+            if (!group) return;
+            group.innerHTML = '';
+
+            const points = [];
+            Object.entries(ideologyDatabase).forEach(([mainCategory, subsObj]) => {
+                Object.entries(subsObj).forEach(([subName, item]) => {
+                    if (item.metrics) {
+                        points.push({
+                            category: mainCategory,
+                            subLabel: subName,
+                            metrics: item.metrics,
+                            theme: item.theme || { hex: "#ff4d00", name: "orange" },
+                            data: item
+                        });
+                    }
+                });
+            });
+
+            points.forEach(p => {
+                // Formula: X goes from 30 to 470, derived from metrics.market (0-100)
+                // Y goes from 470 to 30, derived from metrics.liberty (0-100) where 100% (Libertarian) is TOP, 0% is BOTTOM
+                const cx = 30 + (p.metrics.market / 100) * 440;
+                const cy = 470 - (p.metrics.liberty / 100) * 440;
+                const hex = p.theme.hex;
+
+                const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+                g.setAttribute("class", "cursor-pointer group");
+
+                // Halo glow
+                const halo = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                halo.setAttribute("cx", cx);
+                halo.setAttribute("cy", cy);
+                halo.setAttribute("r", "12");
+                halo.setAttribute("fill", hex);
+                halo.setAttribute("fill-opacity", "0.06");
+                halo.setAttribute("class", "transition-all duration-300 group-hover:scale-150 transform origin-center");
+
+                // High-visibility border rings (only on hover)
+                const ring = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                ring.setAttribute("cx", cx);
+                ring.setAttribute("cy", cy);
+                ring.setAttribute("r", "8");
+                ring.setAttribute("fill", "none");
+                ring.setAttribute("stroke", hex);
+                ring.setAttribute("stroke-width", "0.5");
+                ring.setAttribute("stroke-opacity", "0");
+                ring.setAttribute("class", "transition-all duration-300 group-hover:stroke-opacity-100");
+
+                // Core dot
+                const dot = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                dot.setAttribute("cx", cx);
+                dot.setAttribute("cy", cy);
+                dot.setAttribute("r", "5");
+                dot.setAttribute("fill", hex);
+                dot.setAttribute("stroke", "#121316");
+                dot.setAttribute("stroke-width", "1");
+                dot.setAttribute("class", "transition-all duration-300 group-hover:r-6");
+
+                g.appendChild(halo);
+                g.appendChild(ring);
+                g.appendChild(dot);
+
+                g.addEventListener('click', () => {
+                    inspectCompassNode(p);
+                });
+
+                group.appendChild(g);
+            });
+        }
+
+        function inspectCompassNode(point) {
+            const defBox = document.getElementById('inspectorDefault');
+            const viewBox = document.getElementById('inspectorView');
+            const line = document.getElementById('inspectorHeaderLine');
+            if (!viewBox || !defBox) return;
+
+            defBox.classList.add('hidden');
+            viewBox.classList.remove('hidden');
+
+            if (line) {
+                line.style.backgroundColor = point.theme.hex;
+            }
+
+            // Quadrant text identification
+            let positioningText = "";
+            if (point.metrics.liberty >= 50 && point.metrics.market < 50) {
+                positioningText = "自由意志左翼 [LIBER_LEFT]";
+            } else if (point.metrics.liberty >= 50 && point.metrics.market >= 50) {
+                positioningText = "自由意志右翼 [LIBER_RIGHT]";
+            } else if (point.metrics.liberty < 50 && point.metrics.market < 50) {
+                positioningText = "威權社會左翼 [AUTH_LEFT]";
+            } else {
+                positioningText = "威權保守右翼 [AUTH_RIGHT]";
+            }
+
+            const cleanCategory = point.category.replace(/'/g, "\\'");
+            const cleanSubLabel = point.subLabel.replace(/'/g, "\\'");
+
+            viewBox.innerHTML = `
+                <div class="space-y-4">
+                    <span class="inline-block px-3 py-1 bg-zinc-900 border text-[10px] font-mono font-black" style="border-coler: ${point.theme.hex}30; color: ${point.theme.hex}">
+                        ${positioningText}
+                    </span>
+                    <h3 class="text-3xl font-black text-white tracking-tight uppercase">${point.subLabel}</h3>
+                    <p class="text-xs text-zinc-500 font-mono italic">// CLASS: ${point.category}</p>
+                </div>
+
+                <div class="border-t border-zinc-900 pt-4">
+                    <p class="text-sm text-zinc-400 leading-relaxed">${point.data.desc}</p>
+                </div>
+
+                <!-- Metrics breakdown -->
+                <div class="bg-[#0b0c0f] p-4 border border-zinc-900 space-y-3 font-mono text-xs">
+                    <div>
+                        <div class="flex justify-between text-[10px] text-zinc-500 mb-1">
+                            <span>主權自由 (LIBERTY)</span>
+                            <span style="color: ${point.theme.hex}">${point.metrics.liberty}%</span>
+                        </div>
+                        <div class="h-1 bg-zinc-900 relative">
+                            <div class="h-full" style="width: ${point.metrics.liberty}%; background-color: ${point.theme.hex}"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-[10px] text-zinc-500 mb-1">
+                            <span>自由市場 (MARKET)</span>
+                            <span style="color: ${point.theme.hex}">${point.metrics.market}%</span>
+                        </div>
+                        <div class="h-1 bg-zinc-900 relative">
+                            <div class="h-full" style="width: ${point.metrics.market}%; background-color: ${point.theme.hex}"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 border-t border-zinc-900 pt-4 text-xs">
+                    <div>
+                        <span class="block text-[10px] text-zinc-550 mono uppercase font-bold mb-1">// 代表人物</span>
+                        <span class="text-zinc-300">${point.data.figures ? point.data.figures.join(', ') : '待補充'}</span>
+                    </div>
+                    <div>
+                        <span class="block text-[10px] text-zinc-550 mono uppercase font-bold mb-1">// 實踐範例</span>
+                        <span class="text-zinc-300">${point.data.countries ? point.data.countries.join(', ') : '待補充'}</span>
+                    </div>
+                </div>
+
+                <button onclick="engageCoreDecode('${cleanCategory}', '${cleanSubLabel}')" 
+                        class="w-full text-center py-3 bg-zinc-900 text-xs font-black border tracking-wider select-none hover:bg-zinc-800 transition-all font-mono mt-4" 
+                        style="border-color: ${point.theme.hex}50; color: ${point.theme.hex}">
+                    載入至百科與 AI 深度解碼 [LOAD_INTO_CORE]
+                </button>
+            `;
+        }
+
+        function engageCoreDecode(category, subLabel) {
+            switchTab('database');
+            selectNode(category, subLabel);
+        }
+
+        // ==========================================
+        // TAB 3: SANDBOX SCENARIO SIMULATOR
+        // ==========================================
+        function populateSimulationDropdowns() {
+            const mainSim = document.getElementById('simMainType');
+            const subSim = document.getElementById('simSubType');
+            if (!mainSim || !subSim) return;
+            
+            if (mainSim.options.length <= 1) {
+                mainSim.innerHTML = '<option value="">SELECT_CATEGORY...</option>';
+                Object.keys(ideologyDatabase).forEach(category => {
+                    const opt = document.createElement('option');
+                    opt.value = category;
+                    opt.textContent = category;
+                    mainSim.appendChild(opt);
+                });
+
+                mainSim.addEventListener('change', (e) => {
+                    const val = e.target.value;
+                    subSim.innerHTML = '<option value="">SELECT_SUB_BRANCH...</option>';
+                    if (val && ideologyDatabase[val]) {
+                        Object.keys(ideologyDatabase[val]).forEach(sub => {
+                            const opt = document.createElement('option');
+                            opt.value = sub;
+                            opt.textContent = sub;
+                            subSim.appendChild(opt);
+                        });
+                    }
+                });
+            }
+        }
+
+        // Handle Custom Scenario show/hide
+        document.getElementById('simScenario').addEventListener('change', (e) => {
+            const container = document.getElementById('customScenarioContainer');
+            if (e.target.value === '自訂推演情境') {
+                container.classList.remove('hidden');
+                document.getElementById('simCustomText').required = true;
+            } else {
+                container.classList.add('hidden');
+                document.getElementById('simCustomText').required = false;
+            }
+        });
+
+        // Submit Scenario Simulation Flow
+        document.getElementById('scenarioForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const mainTypeVal = document.getElementById('simMainType').value;
+            const subTypeVal = document.getElementById('simSubType').value;
+            const scenarioVal = document.getElementById('simScenario').value;
+            const customVal = document.getElementById('simCustomText').value;
+            const severityVal = document.querySelector('input[name="simSeverity"]:checked').value;
+            
+            const submitBtn = document.getElementById('simSubmitBtn');
+            const logsDiv = document.getElementById('simLogs');
+            const mdDiv = document.getElementById('simMarkdown');
+            const saveBtn = document.getElementById('saveSimReport');
+            const downloadBtn = document.getElementById('downloadSimPDF');
+
+            if (!mainTypeVal || !subTypeVal) return;
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = '// 推演計算進行中 [COMPUTING...]';
+            saveBtn.classList.add('hidden');
+            if (downloadBtn) downloadBtn.classList.add('hidden');
+            
+            // Console visual sequence logs
+            mdDiv.classList.add('hidden');
+            logsDiv.classList.remove('hidden');
+            logsDiv.innerHTML = '';
+
+            const logsSequence = [
+                `[SYSTEM_BOOT]: INITIALIZING QUANTUM PROJECTION CORE MODEL 3.5...`,
+                `[SYSTEM_BOOT]: ESTABLISHING SECURE CONNECTION_CHANNEL TO GEMINI...`,
+                `[DATA_INGEST]: RETRIEVING IDEOLOGICAL METRICS FOR ${subTypeVal}...`,
+                `[DATA_INGEST]: CONFIRMED_METRICS -> LIBERTY [${ideologyDatabase[mainTypeVal][subTypeVal].metrics?.liberty || 50}%] MARKET [${ideologyDatabase[mainTypeVal][subTypeVal].metrics?.market || 50}%]`,
+                `[PARAM_SET]: CRISIS TARGET DIRECTIVE -> ${scenarioVal === "自訂推演情境" ? "自訂衝突： " + customVal.slice(0, 30) + "..." : scenarioVal}`,
+                `[PARAM_SET]: PERTURBATION COEFFICIENT -> ${severityVal}`,
+                `[MATRIX_ENGAGE]: STREAMING NEURAL SIMULATION CALCULATIONS (EXPECTED_TIME: 4.8s)...`,
+                `[MATRIX_ENGAGE]: MODEL RESPONDED. COMPILING DETAILED MARKDOWN DOSSIER...`
+            ];
+
+            let logIndex = 0;
+            const logInterval = setInterval(() => {
+                if (logIndex < logsSequence.length) {
+                    const span = document.createElement('span');
+                    span.className = 'block text-green-400 font-mono';
+                    span.textContent = `>>> ${logsSequence[logIndex]}`;
+                    logsDiv.appendChild(span);
+                    logIndex++;
+                } else {
+                    clearInterval(logInterval);
+                    // Call backend api simulateScenario
+                    const nodeData = ideologyDatabase[mainTypeVal][subTypeVal];
+                    google.script.run
+                        .withSuccessHandler((response) => {
+                            submitBtn.disabled = false;
+                            submitBtn.textContent = '啟動系統沙盤推演 [ENGAGE_PROJECTION]';
+                            
+                            logsDiv.classList.add('hidden');
+                            mdDiv.classList.remove('hidden');
+                            mdDiv.innerHTML = marked.parse(response);
+                            
+                            // Save simulation state on window
+                            window.lastSimulationResult = {
+                                mainType: mainTypeVal,
+                                subType: subTypeVal,
+                                scenario: scenarioVal === "自訂推演情境" ? customVal : scenarioVal,
+                                severity: severityVal,
+                                response: response
+                            };
+
+                            saveBtn.classList.remove('hidden');
+                            if (downloadBtn) downloadBtn.classList.remove('hidden');
+                        })
+                        .withFailureHandler((err) => {
+                            submitBtn.disabled = false;
+                            submitBtn.textContent = '啟動系統沙盤推演 [ENGAGE_PROJECTION]';
+                            const errSpan = document.createElement('span');
+                            errSpan.className = 'block text-red-500 font-mono font-bold mt-2';
+                            errSpan.textContent = `[CRITICAL_FAILURE]: ${err}`;
+                            logsDiv.appendChild(errSpan);
+                        })
+                        .simulateScenario(subTypeVal, nodeData.desc, scenarioVal, customVal, severityVal);
+                }
+            }, 350);
+        });
+
+        // Download Simulation Report as PDF button click handler
+        document.getElementById('downloadSimPDF').addEventListener('click', () => {
+            if (!window.lastSimulationResult) return;
+            const res = window.lastSimulationResult;
+            
+            const downloadBtn = document.getElementById('downloadSimPDF');
+            const originalText = downloadBtn.textContent;
+            
+            downloadBtn.disabled = true;
+            downloadBtn.textContent = '// 生成 PDF 中 [GENERATING...]';
+            
+            // Create offscreen container styled nicely for printing
+            const printContainer = document.createElement('div');
+            printContainer.style.position = 'absolute';
+            printContainer.style.left = '-9999px';
+            printContainer.style.top = '0';
+            printContainer.style.width = '790px'; // Fit standard A4 width elegantly
+            printContainer.style.backgroundColor = '#ffffff';
+            printContainer.style.boxSizing = 'border-box';
+            
+            const mdDiv = document.getElementById('simMarkdown');
+            
+            printContainer.innerHTML = `
+                <style>
+                  .pdf-report {
+                    color: #1a1a1e;
+                    font-family: 'Noto Sans TC', 'Inter', sans-serif;
+                    line-height: 1.6;
+                    background-color: #ffffff;
+                    padding: 45px;
+                  }
+                  .pdf-header {
+                    border-bottom: 3px solid #ff4d00;
+                    padding-bottom: 15px;
+                    margin-bottom: 25px;
+                  }
+                  .pdf-title-sec {
+                    color: #ff4d00;
+                    font-size: 11px;
+                    font-family: 'JetBrains Mono', monospace;
+                    font-weight: 800;
+                    letter-spacing: 2px;
+                    margin-bottom: 4px;
+                  }
+                  .pdf-title {
+                    font-size: 26px;
+                    font-weight: 900;
+                    color: #121316;
+                    margin: 0;
+                    line-height: 1.25;
+                    letter-spacing: -0.5px;
+                  }
+                  .pdf-meta-grid {
+                    display: grid;
+                    grid-template-columns: repeat(2, 1fr);
+                    gap: 12px;
+                    background-color: #f8f9fa;
+                    border: 1px solid #e9ecef;
+                    padding: 16px;
+                    margin-bottom: 30px;
+                    font-size: 11px;
+                  }
+                  .pdf-meta-item {
+                    display: flex;
+                    flex-direction: column;
+                  }
+                  .pdf-meta-label {
+                    color: #868e96;
+                    font-weight: 700;
+                    font-size: 9px;
+                    text-transform: uppercase;
+                    margin-bottom: 2px;
+                    font-family: 'JetBrains Mono', 'Noto Sans TC', monospace;
+                  }
+                  .pdf-meta-value {
+                    color: #212529;
+                    font-weight: 500;
+                  }
+                  .pdf-content {
+                    font-size: 13.5px;
+                  }
+                  .pdf-content h1, .pdf-content h2, .pdf-content h3 {
+                    color: #ff4d00;
+                    font-weight: 800;
+                    font-family: 'Noto Sans TC', 'JetBrains Mono', sans-serif;
+                    margin-top: 24px;
+                    margin-bottom: 12px;
+                    border-bottom: 1px solid #eee;
+                    padding-bottom: 6px;
+                  }
+                  .pdf-content h1 { font-size: 18px; }
+                  .pdf-content h2 { font-size: 16px; }
+                  .pdf-content h3 { font-size: 14px; }
+                  .pdf-content p {
+                    margin-bottom: 14px;
+                    color: #333333;
+                    text-align: justify;
+                  }
+                  .pdf-content ul, .pdf-content ol {
+                    margin-bottom: 16px;
+                    padding-left: 20px;
+                  }
+                  .pdf-content li {
+                    margin-bottom: 6px;
+                    color: #333333;
+                    list-style-type: square;
+                  }
+                  .pdf-content strong {
+                    color: #000000;
+                    font-weight: 700;
+                  }
+                  .pdf-footer {
+                    border-top: 1px solid #dee2e6;
+                    padding-top: 15px;
+                    margin-top: 40px;
+                    text-align: center;
+                    font-size: 10px;
+                    color: #adb5bd;
+                    font-family: 'JetBrains Mono', monospace;
+                  }
+                </style>
+                <div class="pdf-report">
+                  <div class="pdf-header">
+                    <div class="pdf-title-sec">// SYSTEM_PROJECTION_ARCHIVE_REPORT</div>
+                    <div class="pdf-title">《${res.subType}》生存危機沙盤推演報告</div>
+                  </div>
+                  <div class="pdf-meta-grid">
+                    <div class="pdf-meta-item">
+                      <span class="pdf-meta-label">觀念流派類別 / CATEGORY</span>
+                      <span class="pdf-meta-value">${res.mainType}</span>
+                    </div>
+                    <div class="pdf-meta-item">
+                      <span class="pdf-meta-label">推演情境 / SCENARIO</span>
+                      <span class="pdf-meta-value">${res.scenario}</span>
+                    </div>
+                    <div class="pdf-meta-item">
+                      <span class="pdf-meta-label">衝擊能級 / IMPACT LEVEL</span>
+                      <span class="pdf-meta-value">${res.severity}</span>
+                    </div>
+                    <div class="pdf-meta-item">
+                      <span class="pdf-meta-label">演算生成時間 / TIME STAMP</span>
+                      <span class="pdf-meta-value">${new Date().toLocaleString('zh-TW', { timeZone: 'Asia/Taipei' })}</span>
+                    </div>
+                  </div>
+                  <div class="pdf-content">
+                    ${mdDiv.innerHTML}
+                  </div>
+                  <div class="pdf-footer">
+                    SECRET_KEY_AI_STORED // DEEP_COMPUTATION_NODE // 意識形態百科全書-極密存檔
+                  </div>
+                </div>
+            `;
+            
+            document.body.appendChild(printContainer);
+            
+            // html2pdf options configuration
+            const opt = {
+              margin:       [15, 15, 15, 15],
+              filename:     `意識形態推演報告_${res.subType}_${new Date().toISOString().slice(0,10)}.pdf`,
+              image:        { type: 'jpeg', quality: 0.98 },
+              html2canvas:  { scale: 2, useCORS: true, letterRendering: true },
+              jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+            
+            html2pdf().from(printContainer).set(opt).save().then(() => {
+                document.body.removeChild(printContainer);
+                downloadBtn.disabled = false;
+                downloadBtn.textContent = originalText;
+                showStatus('PDF REPORT DOWNLOADED SUCCESSFULLY', 'text-green-400');
+            }).catch(err => {
+                console.error('PDF export error:', err);
+                document.body.removeChild(printContainer);
+                downloadBtn.disabled = false;
+                downloadBtn.textContent = originalText;
+                showStatus('PDF REPORT GENERATION FAILED', 'text-red-500');
+            });
+        });
+
+        // Save Simulation Report button click handler
+        document.getElementById('saveSimReport').addEventListener('click', () => {
+            if (!window.lastSimulationResult) return;
+            const res = window.lastSimulationResult;
+            
+            google.script.run
+                .withSuccessHandler(() => {
+                    showStatus('SIMULATION REPORT SAVED TO SYSTEMS LOGS', 'text-green-400');
+                    document.getElementById('saveSimReport').classList.add('hidden');
+                    refreshHistory();
+                })
+                .saveIdeology({
+                    mainType: `${res.subType} 推演模型`,
+                    subType: res.scenario.length > 25 ? res.scenario.slice(0, 25) + '...' : res.scenario,
+                    notes: `沙盤推演記錄 - 嚴重度：${res.severity}. 結論：成功錄入推演日誌核心。`
+                });
+        });
+
+        // ==========================================
+        // TAB 4: MATRIX SELECTOR CONTROLLER
+        // ==========================================
+        function populateMatrixSelector() {
+            const grid = document.getElementById('matrixSelectorGrid');
+            if (!grid) return;
+            if (grid.children.length > 0) return; // Prevent double population
+
+            grid.innerHTML = '';
+            Object.entries(ideologyDatabase).forEach(([category, subs]) => {
+                Object.entries(subs).forEach(([subName, data]) => {
+                    const label = document.createElement('label');
+                    label.className = "flex items-center gap-3 p-2 border border-zinc-900 bg-zinc-950/60 hover:border-zinc-700 cursor-pointer transition-all";
+                    
+                    const input = document.createElement('input');
+                    input.type = "checkbox";
+                    input.name = "matrixIdeologies";
+                    input.value = JSON.stringify({ name: subName, desc: data.desc });
+                    input.className = "rounded border-zinc-800 text-[var(--accent)] focus:ring-0 bg-zinc-900";
+                    
+                    const span = document.createElement('span');
+                    span.className = "mono select-none text-[11px] text-zinc-300 font-bold";
+                    span.textContent = subName;
+
+                    label.appendChild(input);
+                    label.appendChild(span);
+                    grid.appendChild(label);
+                });
+            });
+        }
+
+        // Submit Matrix Clash Flow
+        document.getElementById('matrixSubmitBtn').addEventListener('click', () => {
+            const checkedBoxes = document.querySelectorAll('input[name="matrixIdeologies"]:checked');
+            if (checkedBoxes.length < 2 || checkedBoxes.length > 4) {
+                showStatus('請選擇 2 到 4 個思想流派進行對抗推演 [SELECT_2_TO_4]', 'text-amber-500');
+                return;
+            }
+
+            const ideologyList = Array.from(checkedBoxes).map(cb => JSON.parse(cb.value));
+            const scenarioVal = document.getElementById('matrixScenario').value;
+            const submitBtn = document.getElementById('matrixSubmitBtn');
+            const logsDiv = document.getElementById('matrixLogs');
+            const mdDiv = document.getElementById('matrixMarkdown');
+            const saveBtn = document.getElementById('saveMatrixReport');
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = '合縱連橫運算中 [COMPUTING...]';
+            saveBtn.classList.add('hidden');
+            
+            mdDiv.classList.add('hidden');
+            logsDiv.classList.remove('hidden');
+            logsDiv.innerHTML = '';
+
+            const logsSequence = [
+                `[BOOT]: CONNECTING TO QUANTUM GAME THEORY MODEL 3.5...`,
+                `[INGEST]: LOADED ${ideologyList.length} TARGET PARADIGMS FOR CLASH MATRIX...`,
+                `[INGEST]: TARGETS: ${ideologyList.map(id => id.name).join(' vs ')}`,
+                `[SET]: SIMULATION VECTOR -> ${scenarioVal}`,
+                `[ENGAGE]: PARITY CHECKS COMPLETED. SOLVING FOR COOPERATIVE COALITIONS...`,
+                `[COMPILING]: MODEL ANSWER PRODUCED. FORMATTING GEOPOLITICAL DOSSIER...`
+            ];
+
+            let logIndex = 0;
+            const logInterval = setInterval(() => {
+                if (logIndex < logsSequence.length) {
+                    const span = document.createElement('span');
+                    span.className = 'block text-orange-400 font-mono';
+                    span.textContent = `>>> ${logsSequence[logIndex]}`;
+                    logsDiv.appendChild(span);
+                    logIndex++;
+                } else {
+                    clearInterval(logInterval);
+                    google.script.run
+                        .withSuccessHandler((response) => {
+                            submitBtn.disabled = false;
+                            submitBtn.textContent = '計算陣營合縱連橫 [SIMULATE_MATRIX_CLASH]';
+                            
+                            logsDiv.classList.add('hidden');
+                            mdDiv.classList.remove('hidden');
+                            mdDiv.innerHTML = marked.parse(response);
+                            
+                            window.lastMatrixResult = {
+                                list: ideologyList,
+                                scenario: scenarioVal,
+                                response: response
+                            };
+                            saveBtn.classList.remove('hidden');
+                        })
+                        .withFailureHandler((err) => {
+                            submitBtn.disabled = false;
+                            submitBtn.textContent = '計算陣營合縱連橫 [SIMULATE_MATRIX_CLASH]';
+                            const errSpan = document.createElement('span');
+                            errSpan.className = 'block text-red-500 font-mono font-bold mt-2';
+                            errSpan.textContent = `[FAILURE]: ${err}`;
+                            logsDiv.appendChild(errSpan);
+                        })
+                        .matrixCompare(ideologyList, scenarioVal);
+                }
+            }, 350);
+        });
+
+        document.getElementById('saveMatrixReport').addEventListener('click', () => {
+            if (!window.lastMatrixResult) return;
+            const res = window.lastMatrixResult;
+            
+            google.script.run
+                .withSuccessHandler(() => {
+                    showStatus('MATRIX REPORT SAVED TO SYSTEMS LOGS', 'text-green-400');
+                    document.getElementById('saveMatrixReport').classList.add('hidden');
+                    refreshHistory();
+                })
+                .saveIdeology({
+                    mainType: "多邊矩陣對抗模型",
+                    subType: res.scenario.length > 25 ? res.scenario.slice(0, 25) + '...' : res.scenario,
+                    notes: `對抗流派：${res.list.map(id => id.name).join(', ')}. 已寫入核心資料鏈。`
+                });
+        });
+
+        // ==========================================
+        // TAB 5: GENEALOGY SELECTOR CONTROLLER
+        // ==========================================
+        function populateGenealogyDropdowns() {
+            const mainType = document.getElementById('genealogyMainType');
+            const subType = document.getElementById('genealogySubType');
+            if (!mainType || !subType) return;
+            if (mainType.options.length > 1) return; // Prevent double population
+
+            mainType.innerHTML = '<option value="">SELECT_CATEGORY...</option>';
+            Object.keys(ideologyDatabase).forEach(category => {
+                const opt = document.createElement('option');
+                opt.value = category;
+                opt.textContent = category;
+                mainType.appendChild(opt);
+            });
+
+            mainType.addEventListener('change', (e) => {
+                const val = e.target.value;
+                subType.innerHTML = '<option value="">SELECT_SUB_BRANCH...</option>';
+                if (val && ideologyDatabase[val]) {
+                    Object.keys(ideologyDatabase[val]).forEach(sub => {
+                        const opt = document.createElement('option');
+                        opt.value = sub;
+                        opt.textContent = sub;
+                        subType.appendChild(opt);
+                    });
+                }
+            });
+        }
+
+        document.getElementById('genealogySubmitBtn').addEventListener('click', () => {
+            const mainVal = document.getElementById('genealogyMainType').value;
+            const subVal = document.getElementById('genealogySubType').value;
+            if (!mainVal || !subVal) {
+                showStatus('請選擇流派類別與分析分支', 'text-amber-500');
+                return;
+            }
+
+            const nodeData = ideologyDatabase[mainVal][subVal];
+            const submitBtn = document.getElementById('genealogySubmitBtn');
+            const logsDiv = document.getElementById('genealogyLogs');
+            const mdDiv = document.getElementById('genealogyMarkdown');
+            const saveBtn = document.getElementById('saveGenealogyReport');
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = '譜系解碼中 [DECODING...]';
+            saveBtn.classList.add('hidden');
+            
+            mdDiv.classList.add('hidden');
+            logsDiv.classList.remove('hidden');
+            logsDiv.innerHTML = '';
+
+            const logsSequence = [
+                `[ARCHAEOLOGY_START]: RETRIEVING CLASSICAL ORIGINS OF ${subVal}...`,
+                `[GENETIC_INGEST]: SEQUENCING THOUGHT MEMES FROM ${mainVal}...`,
+                `[ANALYSIS]: PARSING Precursors -> Modern Mutations -> SPECULATIVE FUTURE...`,
+                `[SYNC]: AI GENEALOGIST ONLINE. COMPILING LINEAGE REPORT...`
+            ];
+
+            let logIndex = 0;
+            const logInterval = setInterval(() => {
+                if (logIndex < logsSequence.length) {
+                    const span = document.createElement('span');
+                    span.className = 'block text-cyan-400 font-mono';
+                    span.textContent = `>>> ${logsSequence[logIndex]}`;
+                    logsDiv.appendChild(span);
+                    logIndex++;
+                } else {
+                    clearInterval(logInterval);
+                    google.script.run
+                        .withSuccessHandler((response) => {
+                            submitBtn.disabled = false;
+                            submitBtn.textContent = '展開思想譜系溯源 [GENEALOGICAL_DECODE]';
+                            
+                            logsDiv.classList.add('hidden');
+                            mdDiv.classList.remove('hidden');
+                            mdDiv.innerHTML = marked.parse(response);
+                            
+                            window.lastGenealogyResult = {
+                                subVal: subVal,
+                                response: response
+                            };
+                            saveBtn.classList.remove('hidden');
+                        })
+                        .withFailureHandler((err) => {
+                            submitBtn.disabled = false;
+                            submitBtn.textContent = '展開思想譜系溯源 [GENEALOGICAL_DECODE]';
+                            const errSpan = document.createElement('span');
+                            errSpan.className = 'block text-red-500 font-mono font-bold mt-2';
+                            errSpan.textContent = `[FAILURE]: ${err}`;
+                            logsDiv.appendChild(errSpan);
+                        })
+                        .genealogyTree(subVal, nodeData.desc);
+                }
+            }, 350);
+        });
+
+        document.getElementById('saveGenealogyReport').addEventListener('click', () => {
+            if (!window.lastGenealogyResult) return;
+            const res = window.lastGenealogyResult;
+            
+            google.script.run
+                .withSuccessHandler(() => {
+                    showStatus('GENEALOGY REPORT SAVED TO SYSTEMS LOGS', 'text-green-400');
+                    document.getElementById('saveGenealogyReport').classList.add('hidden');
+                    refreshHistory();
+                })
+                .saveIdeology({
+                    mainType: `${res.subVal} 思想譜系`,
+                    subType: "歷史、現代及極限未來變體圖譜",
+                    notes: `譜系考據完成，已備份至本機資料節點。`
+                });
+        });
+
+        // ==========================================
+        // TAB 6: PROPAGANDA SELECTOR CONTROLLER
+        // ==========================================
+        function populatePropagandaSelector() {
+            const grid = document.getElementById('propSelectorGrid');
+            if (!grid) return;
+            if (grid.children.length > 0) return; // Prevent double population
+
+            grid.innerHTML = '';
+            Object.entries(ideologyDatabase).forEach(([category, subs]) => {
+                Object.entries(subs).forEach(([subName, data]) => {
+                    const label = document.createElement('label');
+                    label.className = "flex items-center gap-3 p-2 border border-zinc-900 bg-zinc-950/60 hover:border-zinc-700 cursor-pointer transition-all";
+                    
+                    const input = document.createElement('input');
+                    input.type = "checkbox";
+                    input.name = "propIdeologies";
+                    input.value = subName;
+                    input.className = "rounded border-zinc-800 text-[var(--accent)] focus:ring-0 bg-zinc-900";
+                    
+                    const span = document.createElement('span');
+                    span.className = "mono select-none text-[11px] text-zinc-300 font-bold";
+                    span.textContent = subName;
+
+                    label.appendChild(input);
+                    label.appendChild(span);
+                    grid.appendChild(label);
+                });
+            });
+        }
+
+        document.getElementById('propSubmitBtn').addEventListener('click', () => {
+            const factText = document.getElementById('propnewsText').value.trim();
+            const checkedBoxes = document.querySelectorAll('input[name="propIdeologies"]:checked');
+            
+            if (!factText) {
+                showStatus('請輸入中立新聞事實或數據', 'text-amber-500');
+                return;
+            }
+            if (checkedBoxes.length < 2 || checkedBoxes.length > 3) {
+                showStatus('請選擇 2 到 3 個政治視角眼罩進行對比 [SELECT_2_OR_3]', 'text-amber-500');
+                return;
+            }
+
+            const selectedFactions = Array.from(checkedBoxes).map(cb => cb.value);
+            const submitBtn = document.getElementById('propSubmitBtn');
+            const logsDiv = document.getElementById('propLogs');
+            const mdDiv = document.getElementById('propMarkdown');
+            const saveBtn = document.getElementById('savePropReport');
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = '修辭扭曲射頻中 [SPINNING...]';
+            saveBtn.classList.add('hidden');
+            
+            mdDiv.classList.add('hidden');
+            logsDiv.classList.remove('hidden');
+            logsDiv.innerHTML = '';
+
+            const logsSequence = [
+                `[SPIN_DECOY_INIT]: ENGAGING propaganda resonance filter core...`,
+                `[INGEST_FACT]: FACT COGNITIVE INGESTED -> "[${factText.slice(0, 30)}...]"`,
+                `[FILTER_LOAD]: MOUNTING FRAMING MATRICES FOR [${selectedFactions.join(', ')}]...`,
+                `[TRANS_ENCODE]: TRANSMITTING TO COGNITIVE DISCOURSE SYNTHESIZER...`,
+                `[SYNTH_COMPLETE]: GENERATING RETINAL DECONSTRUCT MARKDOWN DOSSIER...`
+            ];
+
+            let logIndex = 0;
+            const logInterval = setInterval(() => {
+                if (logIndex < logsSequence.length) {
+                    const span = document.createElement('span');
+                    span.className = 'block text-cyan-400 font-mono';
+                    span.textContent = `>>> ${logsSequence[logIndex]}`;
+                    logsDiv.appendChild(span);
+                    logIndex++;
+                } else {
+                    clearInterval(logInterval);
+                    google.script.run
+                        .withSuccessHandler((response) => {
+                            submitBtn.disabled = false;
+                            submitBtn.textContent = '模擬輿論扭曲與戰略射頻 [SIMULATE_NARRATIVE_SPIN]';
+                            
+                            logsDiv.classList.add('hidden');
+                            mdDiv.classList.remove('hidden');
+                            mdDiv.innerHTML = marked.parse(response);
+                            
+                            window.lastPropagandaResult = {
+                                selectedFactions: selectedFactions,
+                                factText: factText,
+                                response: response
+                            };
+                            saveBtn.classList.remove('hidden');
+                        })
+                        .withFailureHandler((err) => {
+                            submitBtn.disabled = false;
+                            submitBtn.textContent = '模擬輿論扭曲與戰略射頻 [SIMULATE_NARRATIVE_SPIN]';
+                            const errSpan = document.createElement('span');
+                            errSpan.className = 'block text-red-500 font-mono font-bold mt-2';
+                            errSpan.textContent = `[FAILURE]: ${err}`;
+                            logsDiv.appendChild(errSpan);
+                        })
+                        .propagandaSpin(factText, selectedFactions);
+                }
+            }, 350);
+        });
+
+        document.getElementById('savePropReport').addEventListener('click', () => {
+            if (!window.lastPropagandaResult) return;
+            const res = window.lastPropagandaResult;
+            
+            google.script.run
+                .withSuccessHandler(() => {
+                    showStatus('PROPAGANDA REPORT SAVED TO SYSTEMS LOGS', 'text-green-400');
+                    document.getElementById('savePropReport').classList.add('hidden');
+                    refreshHistory();
+                })
+                .saveIdeology({
+                    mainType: "輿論偏照宣傳解碼",
+                    subType: res.factText.length > 25 ? res.factText.slice(0, 25) + '...' : res.factText,
+                    notes: `解碼眼罩流派：${res.selectedFactions.join(', ')}. 已寫入系統日誌。`
+                });
+        });
     </script>
 </body>
 </html>

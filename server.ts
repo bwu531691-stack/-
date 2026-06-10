@@ -451,6 +451,124 @@ app.post("/api/action/:functionName", async (req, res) => {
     } catch (error: any) {
       res.status(500).json({ status: "error", message: error.message || String(error) });
     }
+  } else if (functionName === "simulateScenario") {
+    const [name, desc, scenario, customText, severity] = args;
+    const finalScenario = scenario === "自訂推演情境" ? customText : scenario;
+    try {
+      const response = await getAI().models.generateContent({
+        model: "gemini-3.5-flash",
+        contents: `你是一個硬核政治學、權力學與未來學模擬系統。
+現在，我們要對特定的意識形態在重大生存崩潰危機（或變革情境）下的表現，進行多維度的思想沙盤推演與應變預測。
+
+[推演主體 - 意識形態]：
+名稱：${name}
+特徵描述：${desc}
+
+[危機情境]：
+名稱：${finalScenario}
+干涉嚴重度/深度：${severity}
+
+請依據該意識形態的核心價值、歷史權力慣性與決策邏輯，生成一份極具深度與預測性的「硬核推演報告」（以 Markdown 格式輸出），包含以下三大精確章節：
+
+1. [危機反應與控制層] (Crisis Response & Governance Control):
+   - 該體系在面對此危機時的立即反應（是集中權力、完全自由市場調節、還是徹底去中心化自治？）。
+   - 他們如何動員資源？社會治理的強控制手段為何？會制定哪些極具代表性的法規或應變政策？
+
+2. [階級重構與生產力爭論] (Socio-Economic Adaptability & Class Shift):
+   - 勞動、市場與生產工具在此危機下的分配與轉軌方式。
+   - 哪一個社會階級會受益，哪一個階級會受到最慘重的擠壓或剝奪？資本、技術與政治主權的權利爭奪將朝向哪個方向轉化？
+
+3. [熵值上升與二十年後結局預測] (System Entropy & Year +20 Chronicle):
+   - 在中長期（20年後），該思潮形成的政體、協同體或社會網絡，是趨向穩定還是走向系統性內爆？
+   - 描繪一個極具工業/龐克/紀實文學色彩的未來中長期微觀生活特徵或事件斷面景觀。
+
+請使用專業、高度中性、帶有冷酷科學直視感且具有高度批判性的硬核工業風格語氣，不帶有任何居高臨下的道德說教或廉價樂觀，純粹從權力、資源和博弈的角度分析。`,
+      });
+      res.json({ status: "success", data: response.text });
+    } catch (error: any) {
+      res.status(500).json({ status: "error", message: error.message || String(error) });
+    }
+  } else if (functionName === "matrixCompare") {
+    const [ideologyList, conflictScenario] = args;
+    const ideologiesStr = ideologyList.map((id: any) => `【${id.name}】(${id.desc})`).join("\n");
+    try {
+      const response = await getAI().models.generateContent({
+        model: "gemini-3.5-flash",
+        contents: `你是一個硬核地緣政治、制度學與博弈理論專家。
+現在，我們要在生存危機下對以下多個思想流派進行「多邊陣營衝突、對立與聯盟矩陣預測」：
+
+[推演思想流派名單]：
+${ideologiesStr}
+
+[外部衝突/挑戰背景]：
+${conflictScenario}
+
+請依據各流派的核心價值、組織動員偏好與政治博弈邏輯，生成一份「多邊對抗與共生關係矩陣報告」（以 Markdown 格式輸出），包含以下章節：
+
+1. [合縱連橫：聯盟可行性評估] (Alliance Viability & Pragmatic Tacit Agreements)
+   - 分析這幾者在此危機下，哪些可以形成短期戰術同盟？哪些流派之間存在絕對的血仇與「不可調和的意識形態純潔性壁壘」？
+2. [權力主戰場：資源與決策主導爭奪] (Battleground: Power & Core Resource Capture)
+   - 如果這幾個政體/社群共處於同一個地理或系統空間，最核心的主戰場（例如：全自動生產力的擁有權、暴力機器的控制、新行星主權或信仰分配權）會發生在哪裡？
+3. [均衡解預測：誰將建立最終 hegemon 霸權？] (Endgame Equilibrium: System Hegemony or Balkanized Splinter)
+   - 當危機達到頂點時，權力均衡將會走向何方？是其中某一個思想建立極致的集權新體系？還是系統瓦解為多個相互交火的微型割據地帶（巴爾幹化）？
+
+請使用專業、完全中性冷酷、帶有高度地緣博弈直視感的硬核工業風格語氣，不帶有任何道德審查。`,
+      });
+      res.json({ status: "success", data: response.text });
+    } catch (error: any) {
+      res.status(500).json({ status: "error", message: error.message || String(error) });
+    }
+  } else if (functionName === "genealogyTree") {
+    const [name, desc] = args;
+    try {
+      const response = await getAI().models.generateContent({
+        model: "gemini-3.5-flash",
+        contents: `你是一個世界一流的思想流派考古學、觀念史學（History of Ideas）與演化政治學專家。
+現在，我們要對特定思想分支進行「深度思想基因譜系溯源與未來分化 Speculative Speculation」：
+
+[考據核心思想主體]：
+名稱：${name}
+描述：${desc}
+
+請深度剖析該思潮的生命演化，輸出完整的「思想譜系追蹤報告」（以 Markdown 格式輸出），包含以下章節：
+
+1. [觀念起點：歷史思想先驅者] (Precursor Roots & Genesis)
+   - 該思潮的核心基因繼承自歷史上的哪些哲學思想家、流派或經濟學制度？是在對抗什麼歷史思潮、社會轉折或科技變革時誕生的？
+2. [現代基因流動與跨界變體] (Modern Mutations & Synthesis Offshoots)
+   - 該思潮在進入20世紀末與21世紀數位科技時代後，發生了哪些深刻的異變？它與其他政治/科技思潮（例如加速主義、控制論、新中世紀主義等）熔煉出了哪些極具破壞性或生命力的現代/當代衍生變體？
+3. [Speculative Specter: 二百年後極限未來突變] (Year +200 Philosophical Extrapolation)
+   - 假設科技發展與環境危機推至極限（如意識數位化、恆星際擴張、超智奇點），該思潮的核心命題會發生什麼荒誕或極限的突變？在未來的虛擬宇宙或遠星要塞中，它會以何種形態具體顯化？
+
+請使用充滿哲學感、思辨性以及賽博/史詩氣息的硬核冷靜語氣，剖析思想基因的複製、變異與繁衍。`,
+      });
+      res.json({ status: "success", data: response.text });
+    } catch (error: any) {
+      res.status(500).json({ status: "error", message: error.message || String(error) });
+    }
+  } else if (functionName === "propagandaSpin") {
+    const [rawText, selectedList] = args;
+    const selectedListStr = selectedList.join("、");
+    try {
+      const response = await getAI().models.generateContent({
+        model: "gemini-3.5-flash",
+        contents: `你是一個宣傳戰爭與政治話術操縱專家。你深諳大眾輿論戰、概念框架重新包裝（Discursive Reframing）與政治心理學。
+現在，有以下這則【客觀中立的現實新聞/事件數據】：
+「${rawText}」
+
+請針對以下這幾個指定的思想流派：【${selectedListStr}】。
+請分別模擬這幾個陣營官方「核心宣傳部/公關喉舌「如果向其支持者大眾發布對該新聞事件的新聞通告或輿論造勢文章，該如何進行極致的「框架扭曲（Propaganda Spin）」與論述詮釋？
+
+請撰寫「宣傳共鳴實驗室：框架解讀報告」（以 Markdown 格式輸出），針對指定的流派：
+每一個指定流派，請模擬該陣營文宣機器的語調、修辭與思想濾鏡，並輸出：
+- [宣傳戰略架構 (Narrative Framing Strategy)]：他們如何轉移焦點？如何定義敵友關係？
+- [模擬文宣社論/廣播稿 (Simulated Manifesto/Editorial Press Release)]：字數約 120-180 字，具有該流派招牌特徵的政宣語氣（比如：無政府資本主義者的自由交易神聖與官僚稅收搶劫，生態社會主義者的資本掠奪與大自然反噬，或國家主義者的集體利益高於個人利益）。
+
+請使用極具諷刺、洞察力且完全中立展示的「輿論戰剖析」視角。不需要說教，不需要做正面引導，純粹展示「修辭與認知濾鏡如何過濾或重塑同一個客觀事實」。`,
+      });
+      res.json({ status: "success", data: response.text });
+    } catch (error: any) {
+      res.status(500).json({ status: "error", message: error.message || String(error) });
+    }
   } else if (functionName === "saveIdeology") {
     const entry = { timestamp: new Date().toISOString(), ...args[0] };
     mockSpreadsheet.push(entry);
