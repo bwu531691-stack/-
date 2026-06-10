@@ -35,6 +35,65 @@ function getAI(): GoogleGenAI {
   return aiClient;
 }
 
+// Robust helper function to query Gemini models with automatic retries and fallbacks
+async function generateContentWithRetry(params: {
+  contents: string;
+  config?: any;
+}): Promise<{ text: string }> {
+  // Ordered array of models to ensure high resilience under heavy load (503 / 429)
+  const modelsToTry = ["gemini-3.5-flash", "gemini-3.1-flash-lite", "gemini-flash-latest"];
+  let lastError: any = null;
+
+  for (const modelName of modelsToTry) {
+    const ai = getAI();
+    let retries = 2; // Allow up to 2 retries (3 total attempts) on each model if transient errors are hit
+    let delay = 1000;
+
+    for (let attempt = 1; attempt <= retries + 1; attempt++) {
+      try {
+        console.log(`[Gemini API] Trying model ${modelName} (Attempt ${attempt}/${retries + 1})`);
+        
+        const response = await ai.models.generateContent({
+          model: modelName,
+          contents: params.contents,
+          config: params.config,
+        });
+
+        if (response && response.text) {
+          console.log(`[Gemini API] Success using model ${modelName}`);
+          return { text: response.text };
+        } else {
+          throw new Error("Model returned empty or undefined text response.");
+        }
+      } catch (err: any) {
+        lastError = err;
+        const errMessage = err?.message || String(err);
+        console.warn(`[Gemini API Warning] Model ${modelName} failed on attempt ${attempt}:`, errMessage);
+
+        const isTransient = errMessage.includes("503") || 
+                            errMessage.includes("UNAVAILABLE") || 
+                            errMessage.includes("high demand") || 
+                            errMessage.includes("429") || 
+                            errMessage.includes("RESOURCE_EXHAUSTED") ||
+                            errMessage.toLowerCase().includes("overloaded") ||
+                            errMessage.toLowerCase().includes("timeout") ||
+                            errMessage.toLowerCase().includes("fetch failed");
+
+        if (isTransient && attempt <= retries) {
+          console.log(`[Gemini API] Transient error detected. Retrying model ${modelName} in ${delay}ms...`);
+          await new Promise(resolve => setTimeout(resolve, delay));
+          delay *= 1.5;
+        } else {
+          // If it's not a transient error, or we've exhausted all attempts for this model, fallback immediately
+          break;
+        }
+      }
+    }
+  }
+
+  throw new Error(`所有沙盤推演與 AI 分析模型目前均處於極高負載狀態或暫時無法連線。系統已自動嘗試多個備用通道（包括 3.5-flash、3.1-flash-lite 及 standard flash），仍遇到高負載故障。請稍候幾秒再試！\n[詳細錯誤伺服器回應]: ${lastError?.message || lastError}`);
+}
+
 let mockSpreadsheet: any[] = [];
 
 interface IdeologyDetail {
@@ -412,19 +471,18 @@ app.post("/api/action/:functionName", async (req, res) => {
   } else if (functionName === "analyzeIdeology") {
     const [name, desc] = args;
     try {
-      const response = await getAI().models.generateContent({
-        model: "gemini-3-flash-preview",
+      const response = await generateContentWithRetry({
         contents: `你是一個硬核政治學與歷史學分析專家。
 請針對以下意識形態進行深度解析：
 名稱：${name}
 基本描述：${desc}
 
 請回傳精簡但深入的分析，包含以下三個部分：
-1. [核心矛盾] (Core Contradictions): 該思想內部最深刻的邏輯矛盾或實踐困境。
+1. [核心矛盾] (Core Contradictions): 該思想內部最深刻的邏輯矛盾 or 實踐困境。
 2. [權力結構] (Power Dynamics): 這種思想如何重新分配或重構權力關係。
 3. [現代變體] (Modern Evolution): 在當前數位時代或 21 世紀的變體或其影響。
 
-請使用專業、中性但具有批判性的硬核工業風格語氣，並以 Markdown 格式回覆。`,
+請使用專業、中性但具有批判性的硬核工業風格語氣，並以 Markdown 格式回覆。`
       });
       res.json({ status: "success", data: response.text });
     } catch (error: any) {
@@ -433,8 +491,7 @@ app.post("/api/action/:functionName", async (req, res) => {
   } else if (functionName === "compareIdeologies") {
     const [nameA, descA, nameB, descB] = args;
     try {
-      const response = await getAI().models.generateContent({
-        model: "gemini-3-flash-preview",
+      const response = await generateContentWithRetry({
         contents: `你是一個硬核政治學與歷史學分析專家。
 請針對以下兩個意識形態進行「對比與共振檢索分析」：
 意識形態 A：${nameA} (描述: ${descA})
@@ -445,7 +502,7 @@ app.post("/api/action/:functionName", async (req, res) => {
 2. [分歧與實踐對立] (Divergence & Conflict): 兩者在權力構築與實施路徑上最核心的分歧。
 3. [共振綜合體/跨界變體] (Synthesis Paradigm): 如果將這兩種元素熔煉，在現代或未來社會政策中會形成什麼樣的複合體或趨勢？
 
-請使用專業、中性但具有批判性的硬核工業風格語氣，並以 Markdown 格式回覆。`,
+請使用專業、中性但具有批判性的硬核工業風格語氣，並以 Markdown 格式回覆。`
       });
       res.json({ status: "success", data: response.text });
     } catch (error: any) {
@@ -455,8 +512,7 @@ app.post("/api/action/:functionName", async (req, res) => {
     const [name, desc, scenario, customText, severity] = args;
     const finalScenario = scenario === "自訂推演情境" ? customText : scenario;
     try {
-      const response = await getAI().models.generateContent({
-        model: "gemini-3.5-flash",
+      const response = await generateContentWithRetry({
         contents: `你是一個硬核政治學、權力學與未來學模擬系統。
 現在，我們要對特定的意識形態在重大生存崩潰危機（或變革情境）下的表現，進行多維度的思想沙盤推演與應變預測。
 
@@ -482,7 +538,7 @@ app.post("/api/action/:functionName", async (req, res) => {
    - 在中長期（20年後），該思潮形成的政體、協同體或社會網絡，是趨向穩定還是走向系統性內爆？
    - 描繪一個極具工業/龐克/紀實文學色彩的未來中長期微觀生活特徵或事件斷面景觀。
 
-請使用專業、高度中性、帶有冷酷科學直視感且具有高度批判性的硬核工業風格語氣，不帶有任何居高臨下的道德說教或廉價樂觀，純粹從權力、資源和博弈的角度分析。`,
+請使用專業、高度中性、帶有冷酷科學直視感且具有高度批判性的硬核工業風格語氣，不帶有任何居高臨下的道德說教或廉價樂觀，純粹從權力、資源和博弈的角度分析。`
       });
       res.json({ status: "success", data: response.text });
     } catch (error: any) {
@@ -492,8 +548,7 @@ app.post("/api/action/:functionName", async (req, res) => {
     const [ideologyList, conflictScenario] = args;
     const ideologiesStr = ideologyList.map((id: any) => `【${id.name}】(${id.desc})`).join("\n");
     try {
-      const response = await getAI().models.generateContent({
-        model: "gemini-3.5-flash",
+      const response = await generateContentWithRetry({
         contents: `你是一個硬核地緣政治、制度學與博弈理論專家。
 現在，我們要在生存危機下對以下多個思想流派進行「多邊陣營衝突、對立與聯盟矩陣預測」：
 
@@ -512,7 +567,7 @@ ${conflictScenario}
 3. [均衡解預測：誰將建立最終 hegemon 霸權？] (Endgame Equilibrium: System Hegemony or Balkanized Splinter)
    - 當危機達到頂點時，權力均衡將會走向何方？是其中某一個思想建立極致的集權新體系？還是系統瓦解為多個相互交火的微型割據地帶（巴爾幹化）？
 
-請使用專業、完全中性冷酷、帶有高度地緣博弈直視感的硬核工業風格語氣，不帶有任何道德審查。`,
+請使用專業、完全中性冷酷、帶有高度地緣博弈直視感的硬核工業風格語氣，不帶有任何道德審查。`
       });
       res.json({ status: "success", data: response.text });
     } catch (error: any) {
@@ -521,8 +576,7 @@ ${conflictScenario}
   } else if (functionName === "genealogyTree") {
     const [name, desc] = args;
     try {
-      const response = await getAI().models.generateContent({
-        model: "gemini-3.5-flash",
+      const response = await generateContentWithRetry({
         contents: `你是一個世界一流的思想流派考古學、觀念史學（History of Ideas）與演化政治學專家。
 現在，我們要對特定思想分支進行「深度思想基因譜系溯源與未來分化 Speculative Speculation」：
 
@@ -539,7 +593,7 @@ ${conflictScenario}
 3. [Speculative Specter: 二百年後極限未來突變] (Year +200 Philosophical Extrapolation)
    - 假設科技發展與環境危機推至極限（如意識數位化、恆星際擴張、超智奇點），該思潮的核心命題會發生什麼荒誕或極限的突變？在未來的虛擬宇宙或遠星要塞中，它會以何種形態具體顯化？
 
-請使用充滿哲學感、思辨性以及賽博/史詩氣息的硬核冷靜語氣，剖析思想基因的複製、變異與繁衍。`,
+請使用充滿哲學感、思辨性以及賽博/史詩氣息的硬核冷靜語氣，剖析思想基因的複製、變異與繁衍。`
       });
       res.json({ status: "success", data: response.text });
     } catch (error: any) {
@@ -549,9 +603,8 @@ ${conflictScenario}
     const [rawText, selectedList] = args;
     const selectedListStr = selectedList.join("、");
     try {
-      const response = await getAI().models.generateContent({
-        model: "gemini-3.5-flash",
-        contents: `你是一個宣傳戰爭與政治話術操縱專家。你深諳大眾輿論戰、概念框架重新包裝（Discursive Reframing）與政治心理學。
+      const response = await generateContentWithRetry({
+        contents: `你是一個宣傳戰爭與政治話術操縱專家。你深煙大眾輿論戰、概念框架重新包裝（Discursive Reframing）與政治心理學。
 現在，有以下這則【客觀中立的現實新聞/事件數據】：
 「${rawText}」
 
@@ -563,7 +616,7 @@ ${conflictScenario}
 - [宣傳戰略架構 (Narrative Framing Strategy)]：他們如何轉移焦點？如何定義敵友關係？
 - [模擬文宣社論/廣播稿 (Simulated Manifesto/Editorial Press Release)]：字數約 120-180 字，具有該流派招牌特徵的政宣語氣（比如：無政府資本主義者的自由交易神聖與官僚稅收搶劫，生態社會主義者的資本掠奪與大自然反噬，或國家主義者的集體利益高於個人利益）。
 
-請使用極具諷刺、洞察力且完全中立展示的「輿論戰剖析」視角。不需要說教，不需要做正面引導，純粹展示「修辭與認知濾鏡如何過濾或重塑同一個客觀事實」。`,
+請使用極具諷刺、洞察力且完全中立展示的「輿論戰剖析」視角。不需要說教，不需要做正面引導，純粹展示「修辭與認知濾鏡如何過濾或重塑同一個客觀事实」。`
       });
       res.json({ status: "success", data: response.text });
     } catch (error: any) {
